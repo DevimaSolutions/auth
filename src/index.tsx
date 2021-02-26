@@ -1,22 +1,19 @@
 import { Auth } from './auth';
-import type { IAuthUser } from './authBase';
-import type { IAuth, IAuthOptions, IUserBase } from './types';
+import type { IAuth, IAuthOptions } from './types';
 
 /**
- * @param options IAuthOptions to initialize Auth class.
- * @returns initialized Auth instance.
- * If Auth was initilized before the old instance id disposed.
+ * @param options `IAuthOptions` to initialize `oAuth`.
+ * @returns initialized `IAuth` instance.
+ * If `oAuth` was initilized before the old instance id disposed.
  */
-function oAuth<IUser extends IUserBase = IAuthUser>(
-  options: IAuthOptions
-): IAuth<IAuthUser>;
+function oAuth(options: IAuthOptions): IAuth;
 
 /**
- * @returns Auth instance if Auth has been initialized with IAuthOptions before.
- * @throws `Error` when called before Auth is initialized with IAuthOptions.
+ * @returns `IAuth` instance if `oAuth` has been initialized with `IAuthOptions` before.
+ * @throws `Error` when called before `oAuth` is initialized with `IAuthOptions`.
  */
-function oAuth(): IAuth<IAuthUser>;
-function oAuth(options?: IAuthOptions): IAuth<IAuthUser> {
+function oAuth(): IAuth;
+function oAuth(options?: IAuthOptions): IAuth {
   return options ? Auth.initialize(options) : Auth.getInstance();
 }
 

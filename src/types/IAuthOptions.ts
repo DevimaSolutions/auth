@@ -1,6 +1,8 @@
+import type { IAuthResult, IUser } from './IUser';
+
 export default interface IAuthOptions {
-  signInUrl: string;
-  signOutUrl: string;
-  refreshTokenUrl: string;
-  getUserUrl: string;
+  signIn(email: string, password: string): Promise<IAuthResult>;
+  signOut(): Promise<void>;
+  refreshToken(refreshToken: string): Promise<IAuthResult>;
+  getUser(): Promise<IUser>;
 }

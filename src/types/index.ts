@@ -4,4 +4,4 @@ export type {
   AuthCallbackUnsubscriber,
 } from './IAuth';
 export type { default as IAuthOptions } from './IAuthOptions';
-export type { default as IUserBase } from './IUserBase';
+export type { IAuthResult, IUser, AdditionalPayloadValue } from './IUser';

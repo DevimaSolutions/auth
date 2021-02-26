@@ -6,7 +6,9 @@ import type {
 
 /**
  * @abstract This class is inspired by `NodeJS.EventEmitter`
- * (https://nodejs.org/api/events.html#events_class_eventemitter)
+ *
+ * @see Node.JS official docs https://nodejs.org/api/events.html#events_class_eventemitter
+ *
  */
 export default class Emitter implements IEmitter {
   static readonly DEFAULT_MAX_LISTENERS = 10;

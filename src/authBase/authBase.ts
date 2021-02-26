@@ -4,14 +4,11 @@ import type {
   AuthCallback,
   AuthCallbackUnsubscriber,
   IAuthOptions,
+  IUser,
 } from 'src/types';
-import { AuthEventName, IAuthUser } from './authBase.types';
+import { AuthEventName } from './authBase.types';
 
-/**
- * @abstract IAuthUser implementation for generic IUser parameter is hardcoded here for now.
- * It can be refactored in next versions to have more flexible way to store user information.
- */
-export default class AuthBase implements IAuth<IAuthUser> {
+export default class AuthBase implements IAuth {
   private _emitter: IEmitter;
 
   protected readonly _options: IAuthOptions;
@@ -20,7 +17,7 @@ export default class AuthBase implements IAuth<IAuthUser> {
     return this._options;
   }
 
-  constructor(options: IAuthOptions) {
+  protected constructor(options: IAuthOptions) {
     this._options = options;
     this._emitter = new Emitter();
     // TODO call refresh token here
@@ -28,7 +25,7 @@ export default class AuthBase implements IAuth<IAuthUser> {
 
   private _createSubscription(
     eventName: AuthEventName,
-    callback: AuthCallback<IAuthUser>
+    callback: AuthCallback
   ): AuthCallbackUnsubscriber {
     this._emitter.addListener(eventName, callback);
 
@@ -37,17 +34,17 @@ export default class AuthBase implements IAuth<IAuthUser> {
     };
   }
 
-  protected dispose = () => {
+  dispose = () => {
     this._emitter.removeAllListeners();
   };
 
-  getUser(): Promise<IAuthUser> {
+  getUser<User extends IUser>(): Promise<User> {
     throw new Error('Method not implemented.');
   }
   getAuthToken(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  updateUser(_user: Partial<IAuthUser>): Promise<this> {
+  updateUser<User extends IUser>(_user: Partial<User>): Promise<this> {
     throw new Error('Method not implemented.');
   }
   isPending(): boolean {
@@ -66,23 +63,19 @@ export default class AuthBase implements IAuth<IAuthUser> {
     throw new Error('Method not implemented.');
   }
 
-  onSignedIn(callback: AuthCallback<IAuthUser>): AuthCallbackUnsubscriber {
+  onSignedIn(callback: AuthCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onSignedIn, callback);
   }
-  onSignedOut(callback: AuthCallback<IAuthUser>): AuthCallbackUnsubscriber {
+  onSignedOut(callback: AuthCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onSignedOut, callback);
   }
-  onTokenRefreshed(
-    callback: AuthCallback<IAuthUser>
-  ): AuthCallbackUnsubscriber {
+  onTokenRefreshed(callback: AuthCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onTokenRefreshed, callback);
   }
-  onUserChanged(callback: AuthCallback<IAuthUser>): AuthCallbackUnsubscriber {
+  onUserChanged(callback: AuthCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onUserChanged, callback);
   }
-  onAuthStateChanged(
-    callback: AuthCallback<IAuthUser>
-  ): AuthCallbackUnsubscriber {
+  onAuthStateChanged(callback: AuthCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onAuthStateChanged, callback);
   }
 }

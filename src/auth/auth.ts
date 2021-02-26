@@ -1,19 +1,19 @@
 import { AuthBase } from 'src/authBase';
-import type { IAuthOptions } from 'src/types';
+import type { IAuth, IAuthOptions } from 'src/types';
 
 export class Auth extends AuthBase {
-  private static _instance: Auth | null;
+  private static _instance: AuthBase;
 
-  static initialize(options: IAuthOptions) {
+  static initialize(options: IAuthOptions): IAuth {
     if (Auth._instance) {
       Auth._instance.dispose();
     }
 
-    Auth._instance = new Auth(options);
+    Auth._instance = new AuthBase(options);
     return Auth._instance;
   }
 
-  static getInstance() {
+  static getInstance(): IAuth {
     if (!Auth._instance) {
       throw new Error('Auth is not initialized!');
     }

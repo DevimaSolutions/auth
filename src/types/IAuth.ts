@@ -1,15 +1,12 @@
-import type { IAuthUser } from 'src/authBase';
-import type { IUserBase } from '.';
+import type { IUser } from './IUser';
 
-export type AuthCallback<IUser extends IUserBase> = (
-  auth: IAuth<IUser>
-) => void;
+export type AuthCallback = (auth: IAuth) => void;
 export type AuthCallbackUnsubscriber = () => void;
 
-export default interface IAuth<IUser extends IUserBase = IAuthUser> {
-  getUser(): Promise<IUser>;
+export default interface IAuth {
+  getUser<User extends IUser>(): Promise<User>;
   getAuthToken(): Promise<string>;
-  updateUser(user: Partial<IUser>): Promise<this>;
+  updateUser<User extends IUser>(user: Partial<User>): Promise<this>;
   isPending(): boolean;
   isSignedIn(): boolean;
 
@@ -17,9 +14,9 @@ export default interface IAuth<IUser extends IUserBase = IAuthUser> {
   signOut(): Promise<this>;
   refreshToken(token: string): Promise<this>;
 
-  onSignedIn(callback: AuthCallback<IUser>): AuthCallbackUnsubscriber;
-  onSignedOut(callback: AuthCallback<IUser>): AuthCallbackUnsubscriber;
-  onTokenRefreshed(callback: AuthCallback<IUser>): AuthCallbackUnsubscriber;
-  onUserChanged(callback: AuthCallback<IUser>): AuthCallbackUnsubscriber;
-  onAuthStateChanged(callback: AuthCallback<IUser>): AuthCallbackUnsubscriber;
+  onSignedIn(callback: AuthCallback): AuthCallbackUnsubscriber;
+  onSignedOut(callback: AuthCallback): AuthCallbackUnsubscriber;
+  onTokenRefreshed(callback: AuthCallback): AuthCallbackUnsubscriber;
+  onUserChanged(callback: AuthCallback): AuthCallbackUnsubscriber;
+  onAuthStateChanged(callback: AuthCallback): AuthCallbackUnsubscriber;
 }

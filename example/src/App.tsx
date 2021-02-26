@@ -2,20 +2,50 @@ import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
 import oAuth from 'o-auth';
-import type { IAuth } from 'src/types';
+import type { IAuth, IAuthResult, IUser } from 'src/types';
+
+const baseUrl = 'http://localhost';
+const oAuthOptions = {
+  signIn: async (email: string, password: string) => {
+    const res = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        grand_type: 'password',
+        email,
+        password,
+      }),
+    });
+    const json = await res.json();
+    return json as IAuthResult;
+  },
+  signOut: async (): Promise<void> => {
+    await fetch(`${baseUrl}/auth/logout`, {
+      method: 'POST',
+    });
+  },
+  refreshToken: async (refresh_token: string) => {
+    const res = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        grand_type: 'refresh_token',
+        refresh_token,
+      }),
+    });
+    const json = await res.json();
+    return json as IAuthResult;
+  },
+  getUser: async (): Promise<IUser> => {
+    const res = await fetch(`${baseUrl}/user`);
+    const json = await res.json();
+    return json as IUser;
+  },
+};
 
 export default function App() {
   const [result, setResult] = React.useState<IAuth>();
 
   React.useEffect(() => {
-    setResult(
-      oAuth({
-        signInUrl: 'http://localhost/auth',
-        signOutUrl: 'http://localhost/logout',
-        refreshTokenUrl: 'http://localhost/auth/token/refresh',
-        getUserUrl: 'http://localhost/user',
-      })
-    );
+    setResult(oAuth(oAuthOptions));
   }, []);
 
   return (
