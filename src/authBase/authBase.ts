@@ -1,4 +1,4 @@
-import { Emitter, IEmitter } from 'src/emitter';
+import { Emitter, IEmitter } from '../emitter';
 import type {
   IAuth,
   AuthCallback,
@@ -20,6 +20,7 @@ export default class AuthBase implements IAuth {
   protected constructor(options: IAuthOptions) {
     this._options = options;
     this._emitter = new Emitter();
+
     // TODO call refresh token here
   }
 
@@ -34,9 +35,9 @@ export default class AuthBase implements IAuth {
     };
   }
 
-  dispose = () => {
+  dispose() {
     this._emitter.removeAllListeners();
-  };
+  }
 
   getUser<User extends IUser>(): Promise<User> {
     throw new Error('Method not implemented.');

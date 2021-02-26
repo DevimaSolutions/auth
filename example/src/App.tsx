@@ -34,7 +34,7 @@ const oAuthOptions = {
     const json = await res.json();
     return json as IAuthResult;
   },
-  getUser: async (): Promise<IUser> => {
+  getUser: async () => {
     const res = await fetch(`${baseUrl}/user`);
     const json = await res.json();
     return json as IUser;

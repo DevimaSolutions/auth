@@ -151,7 +151,7 @@ export default class Emitter implements IEmitter {
       return this;
     }
 
-    for (let i = listeners.length; i > 0; i--) {
+    for (let i = listeners.length - 1; i >= 0; i--) {
       if (listeners[i] === listener) {
         listeners.splice(i, 1);
         break;
