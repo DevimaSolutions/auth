@@ -29,7 +29,7 @@ export default class AuthBase implements IAuth<IAuthUser> {
   private _createSubscription(
     eventName: AuthEventName,
     callback: AuthCallback<IAuthUser>
-  ) {
+  ): AuthCallbackUnsubscriber {
     this._emitter.addListener(eventName, callback);
 
     return () => {

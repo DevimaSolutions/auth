@@ -13,7 +13,7 @@ function oAuth<IUser extends IUserBase = IAuthUser>(
 
 /**
  * @returns Auth instance if Auth has been initialized with IAuthOptions before.
- * @throws Error when called before Auth is initialized with IAuthOptions.
+ * @throws `Error` when called before Auth is initialized with IAuthOptions.
  */
 function oAuth(): IAuth<IAuthUser>;
 function oAuth(options?: IAuthOptions): IAuth<IAuthUser> {
