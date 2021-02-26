@@ -1,27 +1,27 @@
-import type { IAuth, IAuthOptions } from './auth.types';
+import { AuthBase } from 'src/authBase';
+import type { IAuthOptions } from 'src/types';
 
-export class Auth implements IAuth {
-  private static _instance: IAuth | null;
+export class Auth extends AuthBase {
+  private static _instance: Auth | null;
 
-  static getInstance(options?: IAuthOptions): IAuth {
+  static initialize(options: IAuthOptions) {
+    if (Auth._instance) {
+      Auth._instance.dispose();
+    }
+
+    Auth._instance = new Auth(options);
+    return Auth._instance;
+  }
+
+  static getInstance() {
     if (!Auth._instance) {
-      if (!options) {
-        throw new Error('options are required when creating instance of Auth');
-      }
-
-      Auth._instance = new Auth(options);
+      throw new Error('Auth is not initialized!');
     }
 
     return Auth._instance;
   }
 
-  private readonly _options: IAuthOptions;
-
-  get options(): IAuthOptions {
-    return this._options;
-  }
-
-  constructor(options: IAuthOptions) {
-    this._options = options;
+  static get isInitialized() {
+    return Boolean(Auth._instance);
   }
 }
