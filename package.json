@@ -4,7 +4,7 @@
   "description": "Auth",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
-  "types": "lib/typescript/src/index.d.ts",
+  "types": "lib/typescript/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
   "files": [
@@ -32,6 +32,7 @@
     "bootstrap": "yarn example && yarn && yarn pods"
   },
   "keywords": [
+    "react",
     "react-native",
     "ios",
     "android"
@@ -68,7 +69,8 @@
     "typescript": "^4.1.3"
   },
   "peerDependencies": {
-    "react": "*"
+    "react": "*",
+    "react-native": "*"
   },
   "jest": {
     "preset": "react-native",

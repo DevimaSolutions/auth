@@ -1,21 +1,25 @@
 # o-auth
 
- 
+
 
 ## Installation
 
 ```sh
-npm install o-auth
+npm install @DevimaSolutions/o-auth
 ```
 
 ## Usage
 
 ```js
-import OAuth from "o-auth";
+import OAuth from '@DevimaSolutions/o-auth';
 
 // ...
 
-const result = await OAuth.multiply(3, 7);
+const result = OAuth({
+  loginUrl: 'http://localhost/auth',
+  logoutUrl: 'http://localhost/logout',
+  refreshTokenUrl: 'http://localhost/auth/token/refresh'
+});
 ```
 
 ## Contributing

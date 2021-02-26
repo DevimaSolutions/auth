@@ -1,5 +1,5 @@
-export default {
-  multiply(a: number, b: number) {
-    return Promise.resolve(a * b);
-  },
+import { Auth, IAuth, IAuthOptions } from './auth';
+
+export default (options?: IAuthOptions): IAuth => {
+  return Auth.getInstance(options);
 };
