@@ -5,7 +5,7 @@
 ## Installation
 
 ```sh
-npm install o-auth
+npm install @DevimaSolutions/o-auth
 ```
 
 ## Usage
