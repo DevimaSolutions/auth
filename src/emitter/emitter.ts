@@ -22,7 +22,7 @@ export default class Emitter implements IEmitter {
     this._listeners = {};
   }
 
-  private _checkMaxListenersLimitReached(eventName: string) {
+  private _checkMaxListenersLimitReached(eventName: string): void {
     const listenerCount = this._listeners[eventName]?.length || 0;
     if (listenerCount >= this._maxListeners) {
       throw new Error(
@@ -35,7 +35,7 @@ export default class Emitter implements IEmitter {
     arrayModificationFn: 'push' | 'unshift',
     eventName: string,
     listener: EventListener
-  ) {
+  ): this {
     this._checkMaxListenersLimitReached(eventName);
     this._ensureListenerArray(eventName);
 

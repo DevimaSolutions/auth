@@ -21,7 +21,7 @@ export class Auth extends AuthBase {
     return Auth._instance;
   }
 
-  static get isInitialized() {
+  static get isInitialized(): boolean {
     return Boolean(Auth._instance);
   }
 }
