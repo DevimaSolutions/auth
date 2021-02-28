@@ -1,3 +1,3 @@
-export { default as Storage } from './storage';
+export { default } from './storage';
 
 export type { IStorage } from './storage.types';

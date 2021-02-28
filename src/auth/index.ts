@@ -1,1 +1,1 @@
-export { Auth } from './auth';
+export { default } from './auth';

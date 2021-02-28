@@ -1,7 +1,7 @@
-import { AuthBase } from '../authBase';
+import AuthBase from '../authBase';
 import type { IAuth, IAuthOptions } from '../types';
 
-export class Auth extends AuthBase {
+export default class Auth extends AuthBase {
   private static _instance: Auth;
 
   static initialize(options: IAuthOptions): IAuth {

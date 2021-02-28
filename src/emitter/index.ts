@@ -1,4 +1,4 @@
-export { default as Emitter } from './emitter';
+export { default } from './emitter';
 
 export type {
   EventListener,

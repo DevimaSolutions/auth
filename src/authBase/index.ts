@@ -1,3 +1,3 @@
-export { default as AuthBase } from './authBase';
+export { default } from './authBase';
 
-export type { AuthEventName } from './authBase.types';
+export type { AuthEventName, AuthStorageKey } from './authBase.types';

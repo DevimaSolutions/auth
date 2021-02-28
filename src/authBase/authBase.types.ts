@@ -1,7 +1,15 @@
 export enum AuthEventName {
-  onAuthStateChanged = 'onAuthStateChanged',
-  onSignedIn = 'onSignedIn',
-  onSignedOut = 'onSignedOut',
-  onTokenRefreshed = 'onTokenRefreshed',
-  onUserChanged = 'onUserChanged',
+  onAuthFailed = 'onAuthFailed',
+  OnAuthStateChanged = 'onAuthStateChanged',
+  OnSignedIn = 'onSignedIn',
+  OnSignedOut = 'onSignedOut',
+  OnTokenRefreshed = 'onTokenRefreshed',
+  OnUserChanged = 'onUserChanged',
+}
+
+export enum AuthStorageKey {
+  AuthData = '@o-auth/authData',
+  AuthToken = '@o-auth/authToken',
+  RefreshToken = '@o-auth/refreshToken',
+  User = '@o-auth/user',
 }
