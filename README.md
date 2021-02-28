@@ -11,19 +11,102 @@ npm install @DevimaSolutions/o-auth
 ## Usage
 
 ```js
-import OAuth from '@DevimaSolutions/o-auth';
+import OAuth, { ApiError, IAuthOptions, IAuthResult, IUser } from '@DevimaSolutions/o-auth'
+
+const apiBaseUrl = 'https://my-app.com/api'
+
+// Create an options object.
+// You can use the one below as an example.
+
+const oAuthOptions = {
+  signIn: async (email: string, password: string) => {
+    const res = await fetch(`${apiBaseUrl}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        grand_type: 'password',
+        email,
+        password,
+      }),
+    })
+
+    // Throw ApiError instance if the request had failed.
+    if (!res.ok) {
+      throw new ApiError('Request failed', res)
+    }
+
+    const json = await res.json()
+    // Return IAuthResult (perform mapping if needed).
+    return json as IAuthResult
+  },
+  signOut: async (authToken: string): Promise<void> => {
+    const res = await fetch(`${apiBaseUrl}/auth/logout`, {
+      headers: {
+        authorization: `Bearer ${authToken}`,
+      },
+      method: 'POST',
+    })
+
+    // Throw ApiError instance if the request had failed.
+    if (!res.ok) {
+      throw new ApiError('Request failed', res)
+    }
+    // The signOut method does not require a return value.
+    // If there was no error, then the signOut is considered successful.
+  },
+  refreshToken: async (refresh_token: string) => {
+    const res = await fetch(`${apiBaseUrl}/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({
+        grand_type: 'refresh',
+        refresh_token,
+      }),
+    })
+
+    // Throw ApiError instance if the request had failed.
+    if (!res.ok) {
+      throw new ApiError('Request failed', res)
+    }
+
+    const json = await res.json()
+    // Return IAuthResult (perform mapping if needed).
+    return json as IAuthResult
+  },
+  getUser: async (authToken: string) => {
+    const res = await fetch(`${apiBaseUrl}/user`, {
+      headers: {
+        authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    // Throw ApiError instance if the request had failed.
+    if (!res.ok) {
+      throw new ApiError('Request failed', res)
+    }
+
+    const json = await res.json()
+    // Return IUser object (perform mapping if needed).
+    return json as IUser
+  },
+}
 
 // Pass options first time to initialize
+OAuth(oAuthOptions)
 
-const oAuth = OAuth({
-  loginUrl: 'http://localhost/auth',
-  logoutUrl: 'http://localhost/logout',
-  refreshTokenUrl: 'http://localhost/auth/token/refresh'
-});
+// Then just call the OAuth function to get oAuth object
+await OAuth().signIn("user@example.com", "secret").catch(e => {
+  if (e instanceof ApiError) {
+    const { response } = e;
+    // ...
+    // Handle API errors here
+  }
+})
 
-// Then just call function to get oAuth object
-
-const oAuth = OAuth();
+// Here you are already logged in if no error was thrown.
+// So you can make authenticated calls.
+const response = await OAuth().fetchAuthenticated(`${apiBaseUrl}/user/change-password`, {
+  method: 'PUT',
+  body: JSON.stringify({ password: 'secret2' }),
+})
 ```
 
 ## Live updates with wml
