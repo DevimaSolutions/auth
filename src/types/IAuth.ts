@@ -26,4 +26,5 @@ export default interface IAuth {
   onUserChanged(callback: AuthCallback): AuthCallbackUnsubscriber;
   onAuthStateChanged(callback: AuthCallback): AuthCallbackUnsubscriber;
   onAuthFailed(callback: AuthResponseCallback): AuthCallbackUnsubscriber;
+  oncePendingActionComplete(callback: AuthCallback): AuthCallbackUnsubscriber;
 }

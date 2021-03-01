@@ -10,9 +10,12 @@ export interface IEmitter {
   listeners(eventName: string): EventListener[];
   off(eventName: string, listener: EventListener): this;
   on(eventName: string, listener: EventListener): this;
-  once(eventName: string, listener: EventListener): this;
+  once(eventName: string, listener: EventListener): EventListener;
   prependListener(eventName: string, listener: EventListener): this;
-  prependOnceListener(eventName: string, listener: EventListener): this;
+  prependOnceListener(
+    eventName: string,
+    listener: EventListener
+  ): EventListener;
   removeAllListeners(eventName?: string): this;
   removeListener(eventName: string, listener: EventListener): this;
   setMaxListeners(count: number): this;

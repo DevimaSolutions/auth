@@ -6,7 +6,7 @@ export interface IUser {
 }
 
 export interface IAuthResult {
-  auth_token: string;
+  access_token: string;
   refresh_token: string;
   [key: string]: AdditionalPayloadValue;
 }

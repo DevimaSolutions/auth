@@ -35,7 +35,7 @@ export default class Emitter implements IEmitter {
     arrayModificationFn: 'push' | 'unshift',
     eventName: string,
     listener: EventListener
-  ): this {
+  ): EventListener {
     this._checkMaxListenersLimitReached(eventName);
     this._ensureListenerArray(eventName);
 
@@ -45,7 +45,7 @@ export default class Emitter implements IEmitter {
     };
 
     this._listeners[eventName][arrayModificationFn](onceWrapper);
-    return this;
+    return onceWrapper;
   }
 
   private _ensureListenerArray(eventName: string) {
@@ -67,7 +67,7 @@ export default class Emitter implements IEmitter {
    * @param eventName The event name
    * @param listener The event handler function
    *
-   * @returns a reference to the `Emitter`, so that calls can be chained.
+   * @returns a onceWrapper to be used in removeListener function.
    *
    * @throws `Error` when the list of listeners for the specified `eventName`
    * exceeds the length set by `emitter.maxListeners`.
@@ -87,7 +87,7 @@ export default class Emitter implements IEmitter {
    * @param eventName The event name
    * @param listener The event handler function
    *
-   * @returns a reference to the `Emitter`, so that calls can be chained.
+   * @returns a onceWrapper to be used in removeListener function.
    *
    * @throws `Error` when the list of listeners for the specified `eventName`
    * exceeds the length set by `emitter.maxListeners`.

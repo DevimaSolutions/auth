@@ -16,6 +16,8 @@ import type { AuthResponseCallback } from 'src/types/IAuth';
 export default class AuthBase implements IAuth {
   private _pendingPromise: Promise<void> | null;
   private _isSignedIn: boolean;
+  private _initialPendingPromise: Promise<void> | null = null;
+  private _resolveInitialPending: () => void = () => {};
   private readonly _emitter: IEmitter;
   private readonly _storage: IStorage;
   protected readonly _options: IAuthOptions;
@@ -31,7 +33,19 @@ export default class AuthBase implements IAuth {
     this._storage = new Storage();
     this._options = options;
 
+    this._createInitialPending();
+
     this._tryRefreshToken();
+  }
+
+  private _createInitialPending() {
+    // TODO: find a smarter way to await for refreshToken promise
+    this._initialPendingPromise = new Promise((resolve) => {
+      this._resolveInitialPending = () => {
+        resolve();
+        this._initialPendingPromise = null;
+      };
+    });
   }
 
   private async _tryRefreshToken(): Promise<void> {
@@ -39,6 +53,7 @@ export default class AuthBase implements IAuth {
       const refreshToken = await this.getRefreshToken();
 
       if (!refreshToken) {
+        this._resolveInitialPending();
         return;
       }
 
@@ -46,6 +61,8 @@ export default class AuthBase implements IAuth {
     } catch (e) {
       // The refreshToken not set. return without refreshing
       return;
+    } finally {
+      this._resolveInitialPending();
     }
   }
 
@@ -88,9 +105,12 @@ export default class AuthBase implements IAuth {
         await wrappedFn().catch(reject);
         resolve();
       });
-    } finally {
       await this._pendingPromise;
+    } catch (e) {
+      throw e;
+    } finally {
       this._pendingPromise = null;
+      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
     }
     return this;
   }
@@ -108,7 +128,7 @@ export default class AuthBase implements IAuth {
       headers: {
         'Content-Type': 'application/json',
         ...init?.headers,
-        'authorization': `Bearer ${authToken}`,
+        'authorization': authToken,
       },
     };
   }
@@ -171,7 +191,9 @@ export default class AuthBase implements IAuth {
    * @returns `true` if there is pending action.
    */
   isPending(): boolean {
-    return this._pendingPromise !== null;
+    return (
+      this._pendingPromise !== null || !this._initialPendingPromise !== null
+    );
   }
 
   /**
@@ -205,11 +227,11 @@ export default class AuthBase implements IAuth {
           throw e;
         }
 
-        const { auth_token, refresh_token, ...authData } = authResult;
+        const { access_token, refresh_token, ...authData } = authResult;
 
-        const user = await this._options.getUser(auth_token);
+        const user = await this._options.getUser(access_token);
         await this._storage.multiSet({
-          [AuthStorageKey.AuthToken]: auth_token,
+          [AuthStorageKey.AuthToken]: access_token,
           [AuthStorageKey.RefreshToken]: refresh_token,
           [AuthStorageKey.AuthData]: authData,
           [AuthStorageKey.User]: user,
@@ -251,6 +273,7 @@ export default class AuthBase implements IAuth {
    *
    * @param token The `refreshToken` string. (You should usually get it using
    * `this.getRefreshToken()` method)
+   *
    */
   async refreshToken(token: string): Promise<this> {
     try {
@@ -258,11 +281,11 @@ export default class AuthBase implements IAuth {
         () => this._isSignedIn,
         async () => {
           const authResult = await this._options.refreshToken(token);
-          const { auth_token, refresh_token, ...authData } = authResult;
+          const { access_token, refresh_token, ...authData } = authResult;
 
-          const user = await this._options.getUser(auth_token);
+          const user = await this._options.getUser(access_token);
           await this._storage.multiSet({
-            [AuthStorageKey.AuthToken]: auth_token,
+            [AuthStorageKey.AuthToken]: access_token,
             [AuthStorageKey.RefreshToken]: refresh_token,
             [AuthStorageKey.AuthData]: authData,
             [AuthStorageKey.User]: user,
@@ -332,5 +355,23 @@ export default class AuthBase implements IAuth {
   }
   onAuthFailed(callback: AuthResponseCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onAuthFailed, callback);
+  }
+  oncePendingActionComplete(callback: AuthCallback): AuthCallbackUnsubscriber {
+    // Execute callback immedediately if there is no pending promise.
+    if (!this.isPending()) {
+      callback(this);
+      return () => {};
+    }
+
+    const onceWrapper = this._emitter.once(
+      AuthEventName.OnPendingActionComplete,
+      callback
+    );
+    return () => {
+      this._emitter.removeListener(
+        AuthEventName.OnPendingActionComplete,
+        onceWrapper
+      );
+    };
   }
 }

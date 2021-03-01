@@ -41,7 +41,7 @@ const oAuthOptions: IAuthOptions = {
   signOut: async (authToken: string): Promise<void> => {
     const res = await fetch(`${apiBaseUrl}/auth/logout`, {
       headers: {
-        authorization: `Bearer ${authToken}`,
+        authorization: authToken,
       },
       method: 'POST',
     })
@@ -74,7 +74,7 @@ const oAuthOptions: IAuthOptions = {
   getUser: async (authToken: string) => {
     const res = await fetch(`${apiBaseUrl}/user`, {
       headers: {
-        authorization: `Bearer ${authToken}`,
+        authorization: authToken,
       },
     })
 
@@ -92,7 +92,6 @@ const oAuthOptions: IAuthOptions = {
 // Pass options first time to initialize
 OAuth(oAuthOptions)
 
-// Then just call the OAuth function to get oAuth object
 await OAuth()
   .signIn('user@example.com', 'secret')
   .catch((e) => {
@@ -102,6 +101,20 @@ await OAuth()
       // Handle API errors here
     }
   })
+// Then just call the OAuth function to get oAuth object
+// You can also wait for an active action to finish
+OAuth().oncePendingActionComplete(() => {
+  OAuth()
+    .signIn('admin@gmail.com', 'Repl1cat0R')
+    .catch((e) => {
+      if (e instanceof ApiError) {
+        const { response } = e
+        // ...
+        // Handle API errors here
+      }
+    })
+  console.log(OAuth())
+})
 
 // Here you are already logged in if no error was thrown.
 // So you can make authenticated calls.

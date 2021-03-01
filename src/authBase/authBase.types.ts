@@ -5,6 +5,7 @@ export enum AuthEventName {
   OnSignedOut = 'onSignedOut',
   OnTokenRefreshed = 'onTokenRefreshed',
   OnUserChanged = 'onUserChanged',
+  OnPendingActionComplete = 'onPendingActionComplete',
 }
 
 export enum AuthStorageKey {
