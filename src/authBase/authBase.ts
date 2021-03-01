@@ -106,8 +106,9 @@ export default class AuthBase implements IAuth {
     return {
       ...init,
       headers: {
+        'Content-Type': 'application/json',
         ...init?.headers,
-        authorization: `Bearer ${authToken}`,
+        'authorization': `Bearer ${authToken}`,
       },
     };
   }
@@ -301,7 +302,7 @@ export default class AuthBase implements IAuth {
     init?: RequestInit | undefined
   ): Promise<Response> {
     const res = await this._fetchWithAuthToken(input, init);
-    if (res.status !== 401) {
+    if (res.status !== 401 || !this.isSignedIn()) {
       return res;
     }
 
