@@ -58,7 +58,6 @@ export default class AuthBase implements IAuth {
         if (this._pendingPromise === null) {
           this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
         }
-        console.log('1', { initialPending: this._initialPendingPromise });
         this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
         return;
       }
@@ -69,8 +68,7 @@ export default class AuthBase implements IAuth {
       return;
     } finally {
       this._resolveInitialPending();
-      console.log('2', { initialPending: this._initialPendingPromise });
-      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
     }
   }
 
@@ -133,11 +131,12 @@ export default class AuthBase implements IAuth {
       throw e;
     } finally {
       this._pendingPromise = null;
+      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+
       // TODO: refactor this
       if (this._initialPendingPromise === null) {
-        this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+        this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
       }
-      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
     }
     return this;
   }
