@@ -1,4 +1,11 @@
-export type AdditionalPayloadValue = string | number | string[] | number[];
+export type AdditionalPayloadValue =
+  | string
+  | number
+  | string[]
+  | number[]
+  | null
+  | undefined
+  | object;
 export interface IUser {
   id: string;
   email: string;

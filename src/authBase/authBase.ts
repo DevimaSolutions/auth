@@ -65,6 +65,8 @@ export default class AuthBase implements IAuth {
       await this.refreshToken(refreshToken);
     } catch (e) {
       // The refreshToken not set. return without refreshing
+      // But clear storage from invalid token
+      await this._clearStorage();
       return;
     } finally {
       this._resolveInitialPending();
@@ -98,6 +100,24 @@ export default class AuthBase implements IAuth {
 
     this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
     this._emitter.emit(AuthEventName.OnSignedOut, this);
+    this._emitter.emit(AuthEventName.OnUserChanged, this);
+  }
+
+  private async _forceRefreshToken(token: string) {
+    const authResult = await this._options.refreshToken(token);
+    const { access_token, refresh_token, ...authData } = authResult;
+
+    const user = await this._options.getUser(access_token);
+    await this._storage.multiSet({
+      [AuthStorageKey.AuthToken]: access_token,
+      [AuthStorageKey.RefreshToken]: refresh_token,
+      [AuthStorageKey.AuthData]: authData,
+      [AuthStorageKey.User]: user,
+    });
+
+    this._isSignedIn = true;
+    this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
+    this._emitter.emit(AuthEventName.OnTokenRefreshed, this);
     this._emitter.emit(AuthEventName.OnUserChanged, this);
   }
 
@@ -293,23 +313,7 @@ export default class AuthBase implements IAuth {
     try {
       return this._withPendingPromise(
         () => this._isSignedIn,
-        async () => {
-          const authResult = await this._options.refreshToken(token);
-          const { access_token, refresh_token, ...authData } = authResult;
-
-          const user = await this._options.getUser(access_token);
-          await this._storage.multiSet({
-            [AuthStorageKey.AuthToken]: access_token,
-            [AuthStorageKey.RefreshToken]: refresh_token,
-            [AuthStorageKey.AuthData]: authData,
-            [AuthStorageKey.User]: user,
-          });
-
-          this._isSignedIn = true;
-          this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
-          this._emitter.emit(AuthEventName.OnTokenRefreshed, this);
-          this._emitter.emit(AuthEventName.OnUserChanged, this);
-        }
+        () => this._forceRefreshToken(token)
       );
     } catch (error) {
       if (
@@ -344,10 +348,16 @@ export default class AuthBase implements IAuth {
     }
 
     try {
-      await this._tryRefreshToken();
+      // Refresh token and try again
+      const refreshToken = await this.getRefreshToken();
+      if (!refreshToken) {
+        throw new Error('Unauthenticated');
+      }
+      await this._forceRefreshToken(refreshToken);
       return this._fetchWithAuthToken(input, init);
     } catch {
       // Refresh token failed return original response
+      this.signOut();
       return res;
     }
   }
