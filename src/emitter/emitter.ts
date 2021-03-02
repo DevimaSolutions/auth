@@ -39,9 +39,9 @@ export default class Emitter implements IEmitter {
     this._checkMaxListenersLimitReached(eventName);
     this._ensureListenerArray(eventName);
 
-    const onceWrapper = () => {
+    const onceWrapper = (...args: EventListenerParams) => {
       this.removeListener(eventName, onceWrapper);
-      listener();
+      listener(...args);
     };
 
     this._listeners[eventName][arrayModificationFn](onceWrapper);
