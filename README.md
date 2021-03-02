@@ -22,6 +22,9 @@ const oAuthOptions: IAuthOptions = {
   signIn: async (email: string, password: string) => {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         grand_type: 'password',
         email,
@@ -42,6 +45,7 @@ const oAuthOptions: IAuthOptions = {
     const res = await fetch(`${apiBaseUrl}/auth/logout`, {
       headers: {
         authorization: authToken,
+        'Content-Type': 'application/json',
       },
       method: 'POST',
     })
@@ -56,6 +60,9 @@ const oAuthOptions: IAuthOptions = {
   refreshToken: async (refresh_token: string) => {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         grand_type: 'refresh',
         refresh_token,
@@ -75,6 +82,7 @@ const oAuthOptions: IAuthOptions = {
     const res = await fetch(`${apiBaseUrl}/user`, {
       headers: {
         authorization: authToken,
+        'Content-Type': 'application/json',
       },
     })
 
@@ -105,7 +113,7 @@ await OAuth()
 // You can also wait for an active action to finish
 OAuth().oncePendingActionComplete(() => {
   OAuth()
-    .signIn('admin@gmail.com', 'Repl1cat0R')
+    .signIn('user@example.com', 'secret-password')
     .catch((e) => {
       if (e instanceof ApiError) {
         const { response } = e
