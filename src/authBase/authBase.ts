@@ -54,6 +54,8 @@ export default class AuthBase implements IAuth {
 
       if (!refreshToken) {
         this._resolveInitialPending();
+        // TODO: refactor these emit hacks in _tryRefreshToken
+        this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
         return;
       }
 
@@ -63,6 +65,7 @@ export default class AuthBase implements IAuth {
       return;
     } finally {
       this._resolveInitialPending();
+      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
     }
   }
 
@@ -192,7 +195,7 @@ export default class AuthBase implements IAuth {
    */
   isPending(): boolean {
     return (
-      this._pendingPromise !== null || !this._initialPendingPromise !== null
+      this._pendingPromise !== null || this._initialPendingPromise !== null
     );
   }
 
