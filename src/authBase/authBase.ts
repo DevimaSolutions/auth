@@ -58,6 +58,7 @@ export default class AuthBase implements IAuth {
         if (this._pendingPromise === null) {
           this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
         }
+        console.log('1', { initialPending: this._initialPendingPromise });
         this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
         return;
       }
@@ -68,6 +69,7 @@ export default class AuthBase implements IAuth {
       return;
     } finally {
       this._resolveInitialPending();
+      console.log('2', { initialPending: this._initialPendingPromise });
       this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
     }
   }
@@ -85,6 +87,20 @@ export default class AuthBase implements IAuth {
 
   private _clearStorage() {
     return this._storage.multiRemove(Object.values(AuthStorageKey));
+  }
+
+  private async _forceSignOut() {
+    const authToken = await this.getAuthToken();
+    await this._clearStorage();
+    this._isSignedIn = false;
+
+    if (authToken) {
+      await this._options.signOut(authToken);
+    }
+
+    this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
+    this._emitter.emit(AuthEventName.OnSignedOut, this);
+    this._emitter.emit(AuthEventName.OnUserChanged, this);
   }
 
   /**
@@ -117,7 +133,10 @@ export default class AuthBase implements IAuth {
       throw e;
     } finally {
       this._pendingPromise = null;
-      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+      // TODO: refactor this
+      if (this._initialPendingPromise === null) {
+        this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+      }
       this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
     }
     return this;
@@ -261,19 +280,7 @@ export default class AuthBase implements IAuth {
   signOut(): Promise<this> {
     return this._withPendingPromise(
       () => !this._isSignedIn,
-      async () => {
-        const authToken = await this.getAuthToken();
-        await this._clearStorage();
-        this._isSignedIn = false;
-
-        if (authToken) {
-          await this._options.signOut(authToken);
-        }
-
-        this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
-        this._emitter.emit(AuthEventName.OnSignedOut, this);
-        this._emitter.emit(AuthEventName.OnUserChanged, this);
-      }
+      this._forceSignOut
     );
   }
 
@@ -310,7 +317,7 @@ export default class AuthBase implements IAuth {
         error instanceof ApiError &&
         isClientErrorStatusCode(error.response.status)
       ) {
-        await this.signOut();
+        await this._forceSignOut();
       }
       return this;
     }
