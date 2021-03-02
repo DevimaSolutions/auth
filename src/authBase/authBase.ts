@@ -55,6 +55,9 @@ export default class AuthBase implements IAuth {
       if (!refreshToken) {
         this._resolveInitialPending();
         // TODO: refactor these emit hacks in _tryRefreshToken
+        if (this._pendingPromise === null) {
+          this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
+        }
         this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
         return;
       }
@@ -108,12 +111,14 @@ export default class AuthBase implements IAuth {
         await wrappedFn().catch(reject);
         resolve();
       });
+      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
       await this._pendingPromise;
     } catch (e) {
       throw e;
     } finally {
       this._pendingPromise = null;
       this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
+      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
     }
     return this;
   }
@@ -358,6 +363,12 @@ export default class AuthBase implements IAuth {
   }
   onAuthFailed(callback: AuthResponseCallback): AuthCallbackUnsubscriber {
     return this._createSubscription(AuthEventName.onAuthFailed, callback);
+  }
+  onPendingStateChanged(callback: AuthCallback): AuthCallbackUnsubscriber {
+    return this._createSubscription(
+      AuthEventName.OnPendingStateChanged,
+      callback
+    );
   }
   oncePendingActionComplete(callback: AuthCallback): AuthCallbackUnsubscriber {
     // Execute callback immedediately if there is no pending promise.

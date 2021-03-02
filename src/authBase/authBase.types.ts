@@ -1,6 +1,7 @@
 export enum AuthEventName {
   onAuthFailed = 'onAuthFailed',
   OnAuthStateChanged = 'onAuthStateChanged',
+  OnPendingStateChanged = 'onPendingStateChanged',
   OnSignedIn = 'onSignedIn',
   OnSignedOut = 'onSignedOut',
   OnTokenRefreshed = 'onTokenRefreshed',
