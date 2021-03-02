@@ -33,6 +33,8 @@ export default class AuthBase implements IAuth {
     this._storage = new Storage();
     this._options = options;
 
+    this._forceSignOut = this._forceSignOut.bind(this);
+
     this._createInitialPending();
 
     this._tryRefreshToken();
