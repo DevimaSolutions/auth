@@ -34,6 +34,7 @@ export default class AuthBase implements IAuth {
     this._options = options;
 
     this._forceSignOut = this._forceSignOut.bind(this);
+    this._forceRefreshToken = this._forceRefreshToken.bind(this);
 
     this._createInitialPending();
 
@@ -135,6 +136,7 @@ export default class AuthBase implements IAuth {
     wrappedFn: () => Promise<void>
   ): Promise<this> {
     if (this.isPending()) {
+      await this._initialPendingPromise;
       await this._pendingPromise;
 
       if (successAwaitingCondition()) {
@@ -147,7 +149,10 @@ export default class AuthBase implements IAuth {
         await wrappedFn().catch(reject);
         resolve();
       });
-      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
+
+      if (this._initialPendingPromise !== null) {
+        this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
+      }
       await this._pendingPromise;
     } catch (e) {
       throw e;
