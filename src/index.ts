@@ -1,4 +1,3 @@
-export { default as ApiError } from './apiError';
 export { default as Auth } from './auth';
 export { default as AuthBase } from './authBase';
 export { default as Emitter } from './emitter';
