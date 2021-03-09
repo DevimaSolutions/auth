@@ -8,7 +8,6 @@
   "react-native": "src/index",
   "source": "src/index",
   "files": [
-    "src",
     "lib",
     "android",
     "ios",
@@ -19,7 +18,12 @@
     "!ios/build",
     "!**/__tests__",
     "!**/__fixtures__",
-    "!**/__mocks__"
+    "!**/__mocks__",
+    "!src",
+    "!yarn.lock",
+    "!tsconfig.json",
+    "!tsconfig.build.json",
+    "!babel.config.js"
   ],
   "scripts": {
     "test": "jest",
