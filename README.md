@@ -11,90 +11,49 @@ npm install @DevimaSolutions/o-auth
 ## Usage
 
 ```js
-import OAuth, { ApiError, IAuthOptions, IAuthResult, IUser } from '@DevimaSolutions/o-auth'
-
-const apiBaseUrl = 'https://my-app.com/api'
+import axios from 'axios'
+import OAuth, { IAuthOptions } from '@DevimaSolutions/o-auth'
 
 // Create an options object.
 // You can use the one below as an example.
 
+const axiosInstance = axios.create({
+  baseURL: 'https://my-app.com/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
 const oAuthOptions: IAuthOptions = {
-  signIn: async (email: string, password: string) => {
-    const res = await fetch(`${apiBaseUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+  axiosInstance,
+  signIn: async (email: string, password: string) =>
+    axiosInstance.post('/auth/login', {
+      grand_type: 'password',
+      email,
+      password,
+      scope: 'web_manager',
+    }),
+  signOut: async (authToken: string): Promise<void> =>
+    axiosInstance.post(
+      '/auth/logout',
+      {},
+      {
+        headers: {
+          authorization: authToken,
+        },
       },
-      body: JSON.stringify({
-        grand_type: 'password',
-        email,
-        password,
-      }),
-    })
-
-    // Throw ApiError instance if the request had failed.
-    if (!res.ok) {
-      throw new ApiError('Request failed', res)
-    }
-
-    const json = await res.json()
-    // Return IAuthResult (perform mapping if needed).
-    return json as IAuthResult
-  },
-  signOut: async (authToken: string): Promise<void> => {
-    const res = await fetch(`${apiBaseUrl}/auth/logout`, {
-      headers: {
-        authorization: authToken,
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
-
-    // Throw ApiError instance if the request had failed.
-    if (!res.ok) {
-      throw new ApiError('Request failed', res)
-    }
-    // The signOut method does not require a return value.
-    // If there was no error, then the signOut is considered successful.
-  },
-  refreshToken: async (refresh_token: string) => {
-    const res = await fetch(`${apiBaseUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        grand_type: 'refresh',
-        refresh_token,
-      }),
-    })
-
-    // Throw ApiError instance if the request had failed.
-    if (!res.ok) {
-      throw new ApiError('Request failed', res)
-    }
-
-    const json = await res.json()
-    // Return IAuthResult (perform mapping if needed).
-    return json as IAuthResult
-  },
-  getUser: async (authToken: string) => {
-    const res = await fetch(`${apiBaseUrl}/user`, {
+    ),
+  refreshToken: async (refresh_token: string) =>
+    axiosInstance.post('/auth/login', {
+      grand_type: 'refresh',
+      refresh_token,
+    }),
+  getUser: async (authToken: string) =>
+    axiosInstance.get('/user', {
       headers: {
         authorization: authToken,
-        'Content-Type': 'application/json',
       },
-    })
-
-    // Throw ApiError instance if the request had failed.
-    if (!res.ok) {
-      throw new ApiError('Request failed', res)
-    }
-
-    const json = await res.json()
-    // Return IUser object (perform mapping if needed).
-    return json as IUser
-  },
+    }),
 }
 
 // Pass options first time to initialize
@@ -126,9 +85,8 @@ OAuth().oncePendingActionComplete(() => {
 
 // Here you are already logged in if no error was thrown.
 // So you can make authenticated calls.
-const response = await OAuth().fetchAuthenticated(`${apiBaseUrl}/user/change-password`, {
-  method: 'PUT',
-  body: JSON.stringify({ password: 'secret2' }),
+const response = await OAuth().axios.put('user/change-password', {
+  password: 'secret2'
 })
 ```
 

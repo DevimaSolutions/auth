@@ -1,3 +1,5 @@
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+
 import Emitter, { IEmitter } from '../emitter';
 import Storage, { IStorage } from '../storage';
 import type {
@@ -7,11 +9,10 @@ import type {
   IAuthOptions,
   IUser,
   IAuthResult,
-} from 'src/types';
+  AuthResponseCallback,
+} from '../types';
 import { AuthEventName, AuthStorageKey } from './authBase.types';
-import ApiError from '../apiError';
 import { isClientErrorStatusCode } from '../utils/api.utils';
-import type { AuthResponseCallback } from 'src/types/IAuth';
 
 export default class AuthBase implements IAuth {
   private _pendingPromise: Promise<void> | null;
@@ -20,10 +21,14 @@ export default class AuthBase implements IAuth {
   private _resolveInitialPending: () => void = () => {};
   private readonly _emitter: IEmitter;
   private readonly _storage: IStorage;
-  protected readonly _options: IAuthOptions;
+  protected readonly _options: Required<IAuthOptions>;
 
-  get options(): IAuthOptions {
+  get options(): Required<IAuthOptions> {
     return this._options;
+  }
+
+  get axios(): AxiosInstance {
+    return this._options.axiosInstance;
   }
 
   protected constructor(options: IAuthOptions) {
@@ -31,14 +36,78 @@ export default class AuthBase implements IAuth {
     this._isSignedIn = false;
     this._emitter = new Emitter();
     this._storage = new Storage();
-    this._options = options;
+
+    this._options = {
+      ...options,
+      axiosInstance:
+        options.axiosInstance ??
+        axios.create({
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+    };
+
+    this._configAxios();
 
     this._forceSignOut = this._forceSignOut.bind(this);
     this._forceRefreshToken = this._forceRefreshToken.bind(this);
+    this._updateAuthHeader = this._updateAuthHeader.bind(this);
 
     this._createInitialPending();
 
     this._tryRefreshToken();
+  }
+
+  private _updateAuthHeader(authToken?: string) {
+    if (authToken) {
+      this.axios.defaults.headers = {
+        ...this.axios.defaults.headers,
+        authorization: authToken,
+      };
+    } else {
+      delete this.axios.defaults.headers.authorization;
+    }
+  }
+
+  private _configAxios() {
+    this.axios.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        if (
+          !error.response ||
+          !error.request ||
+          error.response.status !== 401 ||
+          !this.isSignedIn()
+        ) {
+          return Promise.reject(error);
+        }
+
+        try {
+          // Refresh token and try again
+          await this._withPendingPromise(
+            () => this.isSignedIn(),
+            async () => {
+              const refreshToken = await this.getRefreshToken();
+              if (!refreshToken) {
+                throw new Error('Unauthenticated');
+              }
+              await this._forceRefreshToken(refreshToken);
+
+              // Update auth header and retry request
+              const newAuthToken = await this.getAuthToken();
+              error.config.headers.authorization = newAuthToken;
+            }
+          );
+
+          return this.axios.request(error.config);
+        } catch {
+          // Refresh token failed return original response
+          await this.signOut();
+          return Promise.reject(error);
+        }
+      }
+    );
   }
 
   private _createInitialPending() {
@@ -65,7 +134,7 @@ export default class AuthBase implements IAuth {
         return;
       }
 
-      await this.refreshToken(refreshToken);
+      this._forceRefreshToken(refreshToken);
     } catch (e) {
       // The refreshToken not set. return without refreshing
       // But clear storage from invalid token
@@ -73,7 +142,10 @@ export default class AuthBase implements IAuth {
       return;
     } finally {
       this._resolveInitialPending();
-      this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
+      if (this._pendingPromise === null) {
+        this._emitter.emit(AuthEventName.OnPendingStateChanged, this);
+      }
+      this._emitter.emit(AuthEventName.OnPendingActionComplete, this);
     }
   }
 
@@ -101,6 +173,7 @@ export default class AuthBase implements IAuth {
       await this._options.signOut(authToken);
     }
 
+    this._updateAuthHeader();
     this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
     this._emitter.emit(AuthEventName.OnSignedOut, this);
     this._emitter.emit(AuthEventName.OnUserChanged, this);
@@ -108,17 +181,18 @@ export default class AuthBase implements IAuth {
 
   private async _forceRefreshToken(token: string) {
     const authResult = await this._options.refreshToken(token);
-    const { access_token, refresh_token, ...authData } = authResult;
+    const { access_token, refresh_token, ...authData } = authResult.data;
 
     const user = await this._options.getUser(access_token);
     await this._storage.multiSet({
       [AuthStorageKey.AuthToken]: access_token,
       [AuthStorageKey.RefreshToken]: refresh_token,
       [AuthStorageKey.AuthData]: authData,
-      [AuthStorageKey.User]: user,
+      [AuthStorageKey.User]: user.data,
     });
 
     this._isSignedIn = true;
+    this._updateAuthHeader(access_token);
     this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
     this._emitter.emit(AuthEventName.OnTokenRefreshed, this);
     this._emitter.emit(AuthEventName.OnUserChanged, this);
@@ -166,32 +240,6 @@ export default class AuthBase implements IAuth {
       }
     }
     return this;
-  }
-
-  private async _buildFetchParms(
-    init?: RequestInit | undefined
-  ): Promise<RequestInit | undefined> {
-    const authToken = await this.getAuthToken();
-    if (!authToken) {
-      return init;
-    }
-
-    return {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers,
-        'authorization': authToken,
-      },
-    };
-  }
-
-  private async _fetchWithAuthToken(
-    input: RequestInfo,
-    init?: RequestInit | undefined
-  ): Promise<Response> {
-    const params = await this._buildFetchParms(init);
-    return fetch(input, params);
   }
 
   /**
@@ -269,28 +317,27 @@ export default class AuthBase implements IAuth {
     return this._withPendingPromise(
       () => this._isSignedIn,
       async () => {
-        let authResult: IAuthResult;
+        let authResult: AxiosResponse<IAuthResult>;
 
         try {
           authResult = await this._options.signIn(email, password);
         } catch (e) {
-          if (e instanceof ApiError) {
-            this._emitter.emit(AuthEventName.onAuthFailed, e.response);
-          }
+          this._emitter.emit(AuthEventName.onAuthFailed, e.response);
           throw e;
         }
 
-        const { access_token, refresh_token, ...authData } = authResult;
+        const { access_token, refresh_token, ...authData } = authResult.data;
 
         const user = await this._options.getUser(access_token);
         await this._storage.multiSet({
           [AuthStorageKey.AuthToken]: access_token,
           [AuthStorageKey.RefreshToken]: refresh_token,
           [AuthStorageKey.AuthData]: authData,
-          [AuthStorageKey.User]: user,
+          [AuthStorageKey.User]: user.data,
         });
 
         this._isSignedIn = true;
+        this._updateAuthHeader(access_token);
         this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
         this._emitter.emit(AuthEventName.OnSignedIn, this);
         this._emitter.emit(AuthEventName.OnUserChanged, this);
@@ -323,49 +370,10 @@ export default class AuthBase implements IAuth {
         () => this._forceRefreshToken(token)
       );
     } catch (error) {
-      if (
-        error instanceof ApiError &&
-        isClientErrorStatusCode(error.response.status)
-      ) {
+      if (isClientErrorStatusCode(error.response?.status)) {
         await this._forceSignOut();
       }
       return this;
-    }
-  }
-
-  /**
-   *
-   * @param input The path to the resource you want to fetch
-   * @param init Options object
-   *
-   * @returns a `Promise` that resolves to the `Response` to that request,
-   * whether it is successful or not
-   *
-   * @description This is a wrapper for the original `fetch` API. The wrapper
-   * adds authrization header to the request and tries to refresh the access
-   * token if `fetch` returned `401` status code.
-   */
-  async fetchAuthenticated(
-    input: RequestInfo,
-    init?: RequestInit | undefined
-  ): Promise<Response> {
-    const res = await this._fetchWithAuthToken(input, init);
-    if (res.status !== 401 || !this.isSignedIn()) {
-      return res;
-    }
-
-    try {
-      // Refresh token and try again
-      const refreshToken = await this.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error('Unauthenticated');
-      }
-      await this._forceRefreshToken(refreshToken);
-      return this._fetchWithAuthToken(input, init);
-    } catch {
-      // Refresh token failed return original response
-      this.signOut();
-      return res;
     }
   }
 
