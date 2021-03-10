@@ -134,12 +134,11 @@ export default class AuthBase implements IAuth {
         return;
       }
 
-      this._forceRefreshToken(refreshToken);
+      await this._forceRefreshToken(refreshToken);
     } catch (e) {
       // The refreshToken not set. return without refreshing
       // But clear storage from invalid token
-      await this._clearStorage();
-      return;
+      await this._forceSignOut();
     } finally {
       this._resolveInitialPending();
       if (this._pendingPromise === null) {
