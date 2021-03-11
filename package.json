@@ -1,6 +1,6 @@
 {
   "name": "@DevimaSolutions/o-auth",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Auth",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
