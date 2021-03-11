@@ -1,6 +1,6 @@
 {
   "name": "@DevimaSolutions/o-auth",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Auth",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -9,6 +9,7 @@
   "source": "lib/commonjs/index",
   "files": [
     "lib",
+    "src",
     "android",
     "ios",
     "cpp",
@@ -19,7 +20,6 @@
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
-    "!src",
     "!yarn.lock",
     "!tsconfig.json",
     "!tsconfig.build.json",
