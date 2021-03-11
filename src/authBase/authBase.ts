@@ -2,6 +2,10 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 import Emitter, { IEmitter } from '../emitter';
 import Storage, { IStorage } from '../storage';
+import { AuthEventName, AuthStorageKey } from './authBase.types';
+import { isClientErrorStatusCode } from '../utils/api.utils';
+import SocketManager from '../socketManager';
+import type { ISocketManager } from '../socketManager';
 import type {
   IAuth,
   AuthCallback,
@@ -11,8 +15,6 @@ import type {
   IAuthResult,
   AuthResponseCallback,
 } from '../types';
-import { AuthEventName, AuthStorageKey } from './authBase.types';
-import { isClientErrorStatusCode } from '../utils/api.utils';
 
 export default class AuthBase implements IAuth {
   private _pendingPromise: Promise<void> | null;
@@ -21,12 +23,23 @@ export default class AuthBase implements IAuth {
   private _resolveInitialPending: () => void = () => {};
   private readonly _emitter: IEmitter;
   private readonly _storage: IStorage;
+  private readonly _socketManager: ISocketManager;
   protected readonly _options: Required<IAuthOptions>;
 
   get options(): Required<IAuthOptions> {
     return this._options;
   }
 
+  /**
+   * Exposes API for interactions with socket server
+   */
+  get socketManager(): ISocketManager {
+    return this._socketManager;
+  }
+
+  /**
+   * Instance of axios you should use to perform authorized requests
+   */
   get axios(): AxiosInstance {
     return this._options.axiosInstance;
   }
@@ -36,6 +49,7 @@ export default class AuthBase implements IAuth {
     this._isSignedIn = false;
     this._emitter = new Emitter();
     this._storage = new Storage();
+    this._socketManager = new SocketManager(this);
 
     this._options = {
       ...options,

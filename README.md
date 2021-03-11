@@ -62,11 +62,9 @@ OAuth(oAuthOptions)
 await OAuth()
   .signIn('user@example.com', 'secret')
   .catch((e) => {
-    if (e instanceof ApiError) {
-      const { response } = e
-      // ...
-      // Handle API errors here
-    }
+    const { response } = e
+    // ...
+    // Handle API errors here
   })
 // Then just call the OAuth function to get oAuth object
 // You can also wait for an active action to finish
@@ -74,11 +72,9 @@ OAuth().oncePendingActionComplete(() => {
   OAuth()
     .signIn('user@example.com', 'secret-password')
     .catch((e) => {
-      if (e instanceof ApiError) {
-        const { response } = e
-        // ...
-        // Handle API errors here
-      }
+      const { response } = e
+      // ...
+      // Handle API errors here
     })
   console.log(OAuth())
 })
