@@ -86,6 +86,32 @@ const response = await OAuth().axios.put('user/change-password', {
 })
 ```
 
+
+## Socket usage
+
+```javascript
+
+async function createSocketSubscription() {
+  const socket = await OAuth().socketManager.createSocketConnection(
+    'https://socket.greenparc.devima.tech',
+    'notes',
+    '318',
+  )
+
+  socket.on('rooms-updated', (roomChanges) => {
+    //  Handle event
+  })
+
+  socket.on('connection-error', () => {
+    // Handle connection error
+  })
+
+  return () => {
+    OAuth().socketManager.disconnect(socket)
+  }
+}
+```
+
 ## Live updates with wml
 
 [WML](https://github.com/wix/wml) is used to perform live mapping of library
