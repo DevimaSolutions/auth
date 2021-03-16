@@ -9,60 +9,54 @@ import type {
 export default class SocketManager implements ISocketManager {
   private _auth: IAuth;
   private _sockets: Socket[];
-  private readonly _eventList: string[];
 
   constructor(auth: IAuth) {
     this._auth = auth;
     this._sockets = [];
-    this._eventList = [
-      'connect_error',
-      'connect',
-      'disconnect',
-      'room-connected',
-      'msg',
-    ];
   }
 
-  private _connect(socket: Socket, socketRoom: string, roomId?: string) {
+  private _connect(
+    socket: Socket,
+    socketRoom: string,
+    roomId?: string | number
+  ) {
     return new Promise<void>((resolve, reject) => {
-      console.log('connect');
       socket.connect();
 
-      socket.on('connect_error', (err: Error) => {
-        console.log('connect_error');
+      const errorListener = (err: Error) => {
         this.disconnect(socket);
         reject(err);
-      });
+      };
+
+      const disconnectListener = () => {
+        this.disconnect(socket);
+        reject(new Error('disconnect'));
+      };
+
+      socket.on('connect_error', errorListener);
+      socket.on('disconnect', disconnectListener);
 
       socket.on('connect', () => {
-        const room = roomId ? `${socketRoom}/${roomId}` : socketRoom;
-        socket.emit('room', room);
+        const room = roomId ? `/${socketRoom}/${roomId}` : `/${socketRoom}`;
+        socket.emit('r', room);
 
-        socket.on('room-connected', () => {
+        socket.on('r-connected', () => {
+          socket.off('connect_error', errorListener);
+          socket.off('disconnect', disconnectListener);
           resolve();
         });
       });
-
-      socket.on('disconnect', () => {
-        this.disconnect(socket);
-        console.log('disconnect');
-        reject(new Error('disconnect'));
-      });
     });
   }
 
-  disconnect(socket: Socket) {
-    this._eventList.forEach((eventName) => {
-      socket.off(eventName);
-    });
+  disconnect(socket: Socket): void {
+    socket.disconnect();
     this._sockets = this._sockets.filter((s) => s !== socket);
   }
 
   disconnectAll() {
     this._sockets.forEach((socket) => {
-      this._eventList.forEach((eventName) => {
-        socket.off(eventName);
-      });
+      socket.disconnect();
     });
     this._sockets = [];
   }
@@ -70,7 +64,7 @@ export default class SocketManager implements ISocketManager {
   async createSocketConnection(
     uri: string,
     socketRoom: string,
-    roomId?: string,
+    roomId?: string | number,
     options?: ISocketClientOptions
   ) {
     const token = await this._auth.getAuthToken();
@@ -83,13 +77,9 @@ export default class SocketManager implements ISocketManager {
       ...options,
     });
 
-    socket.onAny((event, ...args) => {
-      console.log(event, args);
-    });
-    console.log({ socket });
-
     await this._connect(socket, socketRoom, roomId);
     this._sockets.push(socket);
+
     return socket;
   }
 }
