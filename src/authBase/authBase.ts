@@ -48,11 +48,12 @@ export default class AuthBase implements IAuth {
     this._pendingPromise = null;
     this._isSignedIn = false;
     this._emitter = new Emitter();
-    this._storage = new Storage();
+    this._storage = options.storage ?? new Storage();
     this._socketManager = new SocketManager(this);
 
     this._options = {
       ...options,
+      storage: this._storage,
       axiosInstance:
         options.axiosInstance ??
         axios.create({
