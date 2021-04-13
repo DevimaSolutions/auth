@@ -4,6 +4,7 @@ import type { IAuthResult, IUser } from './IUser';
 export default interface IAuthOptions {
   axiosInstance?: AxiosInstance;
   storage?: IStorage;
+  useSocketManager?: boolean;
   signIn(email: string, password: string): Promise<AxiosResponse<IAuthResult>>;
   signOut(authToken: string): Promise<void>;
   refreshToken(refreshToken: string): Promise<AxiosResponse<IAuthResult>>;
