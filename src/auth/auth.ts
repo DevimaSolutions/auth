@@ -13,6 +13,15 @@ export default class Auth extends AuthBase {
     return Auth._instance;
   }
 
+  static hydrate(options: IAuthOptions, isSignedIn: boolean): IAuth {
+    if (Auth._instance) {
+      Auth._instance.dispose();
+    }
+
+    Auth._instance = new Auth(options, isSignedIn);
+    return Auth._instance;
+  }
+
   static getInstance(): IAuth {
     if (!Auth._instance) {
       throw new Error('Auth is not initialized!');

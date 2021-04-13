@@ -1,6 +1,6 @@
 import type { AxiosInstance } from 'axios';
+import type { IAuthOptions, IUser } from '.';
 import type { ISocketManager } from '../socketManager';
-import type { IUser } from './IUser';
 
 export type AuthCallback = (auth: IAuth) => void | Promise<void>;
 export type AuthResponseCallback = (response: Response) => void | Promise<void>;
@@ -8,6 +8,7 @@ export type AuthCallbackUnsubscriber = () => void;
 
 export default interface IAuth {
   axios: AxiosInstance;
+  options: IAuthOptions;
   socketManager: ISocketManager;
   getUser<User extends IUser>(): Promise<User | null>;
   getAuthToken(): Promise<string | null>;

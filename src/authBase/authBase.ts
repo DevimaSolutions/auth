@@ -23,7 +23,7 @@ export default class AuthBase implements IAuth {
   private _resolveInitialPending: () => void = () => {};
   private readonly _emitter: IEmitter;
   private readonly _storage: IStorage;
-  private readonly _socketManager: ISocketManager;
+  private readonly _socketManager: ISocketManager | null;
   protected readonly _options: Required<IAuthOptions>;
 
   get options(): Required<IAuthOptions> {
@@ -34,7 +34,7 @@ export default class AuthBase implements IAuth {
    * Exposes API for interactions with socket server
    */
   get socketManager(): ISocketManager {
-    return this._socketManager;
+    return this._socketManager!;
   }
 
   /**
@@ -44,15 +44,18 @@ export default class AuthBase implements IAuth {
     return this._options.axiosInstance;
   }
 
-  protected constructor(options: IAuthOptions) {
+  protected constructor(options: IAuthOptions, isSignedIn?: boolean) {
     this._pendingPromise = null;
-    this._isSignedIn = false;
+    this._isSignedIn = isSignedIn ?? false;
     this._emitter = new Emitter();
     this._storage = options.storage ?? new Storage();
-    this._socketManager = new SocketManager(this);
+    this._socketManager = options.useSocketManager
+      ? new SocketManager(this)
+      : null;
 
     this._options = {
       ...options,
+      useSocketManager: options.useSocketManager ?? false,
       storage: this._storage,
       axiosInstance:
         options.axiosInstance ??
@@ -69,9 +72,11 @@ export default class AuthBase implements IAuth {
     this._forceRefreshToken = this._forceRefreshToken.bind(this);
     this._updateAuthHeader = this._updateAuthHeader.bind(this);
 
-    this._createInitialPending();
-
-    this._tryRefreshToken();
+    // Do not force refresh when isSignedIn is passed to construct the auth
+    if (typeof isSignedIn === 'undefined') {
+      this._createInitialPending();
+      this._tryRefreshToken();
+    }
   }
 
   private _updateAuthHeader(authToken?: string) {
