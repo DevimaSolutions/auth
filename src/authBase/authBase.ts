@@ -365,6 +365,36 @@ export default class AuthBase implements IAuth {
   }
 
   /**
+   *
+   * @param user User
+   * @param authResult authentication tokens and data
+   *
+   * @description This method will save the authentication token
+   * and the user information in the `AsyncStorage`.
+   */
+  setAuth(user: IUser, authResult: IAuthResult): Promise<this> {
+    return this._withPendingPromise(
+      () => this._isSignedIn,
+      async () => {
+        const { access_token, refresh_token, ...authData } = authResult;
+
+        await this._storage.multiSet({
+          [AuthStorageKey.AuthToken]: access_token,
+          [AuthStorageKey.RefreshToken]: refresh_token,
+          [AuthStorageKey.AuthData]: authData,
+          [AuthStorageKey.User]: user,
+        });
+
+        this._isSignedIn = true;
+        this._updateAuthHeader(access_token);
+        this._emitter.emit(AuthEventName.OnAuthStateChanged, this);
+        this._emitter.emit(AuthEventName.OnSignedIn, this);
+        this._emitter.emit(AuthEventName.OnUserChanged, this);
+      }
+    );
+  }
+
+  /**
    * @description This method will call the `signOut` method from `IAuthOptions`
    * and then clear the authentication token and get all user information
    * from the `AsyncStorage`.

@@ -1,6 +1,7 @@
 export type AdditionalPayloadValue =
   | string
   | number
+  | boolean
   | string[]
   | number[]
   | null

@@ -1,5 +1,5 @@
 import type { AxiosInstance } from 'axios';
-import type { IAuthOptions, IUser } from '.';
+import type { IAuthOptions, IAuthResult, IUser } from '.';
 import type { ISocketManager } from '../socketManager';
 
 export type AuthCallback = (auth: IAuth) => void | Promise<void>;
@@ -13,6 +13,7 @@ export default interface IAuth {
   getUser<User extends IUser>(): Promise<User | null>;
   getAuthToken(): Promise<string | null>;
   getRefreshToken(): Promise<string | null>;
+  setAuth(user: IUser, authResult: IAuthResult): Promise<this>;
   updateUser<User extends IUser>(user: Partial<User>): Promise<this>;
   isPending(): boolean;
   isSignedIn(): boolean;
