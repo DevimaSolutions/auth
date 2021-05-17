@@ -309,6 +309,7 @@ export default class AuthBase implements IAuth {
       ...(oldUser || {}),
       ...user,
     });
+    this._emitter.emit(AuthEventName.OnUserChanged, this);
     return this;
   }
 
