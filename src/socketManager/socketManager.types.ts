@@ -1,5 +1,9 @@
 import type { ManagerOptions, Socket, SocketOptions } from 'socket.io-client';
 
+export type IO = (
+  uri: string,
+  opts?: Partial<ManagerOptions & SocketOptions>
+) => Socket;
 export type ISocketClientOptions = Partial<ManagerOptions & SocketOptions>;
 
 export type SocketEventCallback<T> = (data: T) => void | Promise<void>;

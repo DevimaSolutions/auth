@@ -1,16 +1,25 @@
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import type { IAuth } from 'src/types';
 import type {
   ISocketManager,
   ISocketClientOptions,
+  IO,
 } from './socketManager.types';
 
 export default class SocketManager implements ISocketManager {
+  private _io: IO;
   private _auth: IAuth;
   private _sockets: Socket[];
 
   constructor(auth: IAuth) {
+    try {
+      this._io = require('socket.io-client');
+    } catch {
+      throw new Error(
+        'socket.io-client package is required to use SocketManager instance!'
+      );
+    }
     this._auth = auth;
     this._sockets = [];
   }
@@ -69,7 +78,7 @@ export default class SocketManager implements ISocketManager {
   ) {
     const token = await this._auth.getAuthToken();
 
-    const socket = io(uri, {
+    const socket = this._io(uri, {
       auth: {
         token,
       },

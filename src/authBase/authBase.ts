@@ -189,7 +189,12 @@ export default class AuthBase implements IAuth {
     this._isSignedIn = false;
 
     if (authToken) {
-      await this._options.signOut(authToken);
+      try {
+        await this._options.signOut(authToken);
+      } catch {
+        // Do nothing if signout request failed.
+        // We still cleared auth data on device.
+      }
     }
 
     this._updateAuthHeader();
