@@ -14,6 +14,7 @@ import type {
   IUser,
   IAuthResult,
   AuthResponseCallback,
+  ISignedInOptions,
 } from '../types';
 
 export default class AuthBase implements IAuth {
@@ -44,9 +45,12 @@ export default class AuthBase implements IAuth {
     return this._options.axiosInstance;
   }
 
-  protected constructor(options: IAuthOptions, isSignedIn?: boolean) {
+  protected constructor(
+    options: IAuthOptions,
+    signedInOptions?: ISignedInOptions
+  ) {
     this._pendingPromise = null;
-    this._isSignedIn = isSignedIn ?? false;
+    this._isSignedIn = signedInOptions?.isSignedIn ?? false;
     this._emitter = new Emitter();
     this._storage = options.storage ?? new Storage();
     this._socketManager = options.useSocketManager
@@ -73,9 +77,11 @@ export default class AuthBase implements IAuth {
     this._updateAuthHeader = this._updateAuthHeader.bind(this);
 
     // Do not force refresh when isSignedIn is passed to construct the auth
-    if (typeof isSignedIn === 'undefined') {
+    if (typeof signedInOptions === 'undefined') {
       this._createInitialPending();
       this._tryRefreshToken();
+    } else {
+      this._updateAuthHeader(signedInOptions.authToken);
     }
   }
 
@@ -112,6 +118,7 @@ export default class AuthBase implements IAuth {
               if (!refreshToken) {
                 throw new Error('Unauthenticated');
               }
+
               await this._forceRefreshToken(refreshToken);
 
               // Update auth header and retry request
