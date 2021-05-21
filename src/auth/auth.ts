@@ -1,5 +1,5 @@
 import AuthBase from '../authBase';
-import type { IAuth, IAuthOptions } from '../types';
+import type { IAuth, IAuthOptions, ISignedInOptions } from '../types';
 
 export default class Auth extends AuthBase {
   private static _instance: Auth;
@@ -13,12 +13,15 @@ export default class Auth extends AuthBase {
     return Auth._instance;
   }
 
-  static hydrate(options: IAuthOptions, isSignedIn: boolean): IAuth {
+  static hydrate(
+    options: IAuthOptions,
+    signedInOptions: ISignedInOptions
+  ): IAuth {
     if (Auth._instance) {
       Auth._instance.dispose();
     }
 
-    Auth._instance = new Auth(options, isSignedIn);
+    Auth._instance = new Auth(options, signedInOptions);
     return Auth._instance;
   }
 
