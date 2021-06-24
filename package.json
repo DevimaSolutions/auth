@@ -1,6 +1,6 @@
 {
   "name": "@DevimaSolutions/o-auth",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Auth",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -33,7 +33,8 @@
     "release": "release-it",
     "example": "yarn --cwd example",
     "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "bootstrap": "yarn example && yarn && yarn pods",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "react",
