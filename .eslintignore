@@ -1,0 +1,4 @@
+lib
+dist/bundle.js
+example
+node_modules

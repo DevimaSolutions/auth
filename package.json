@@ -1,0 +1,55 @@
+{
+  "name": "@devimasolutions/auth",
+  "version": "0.3.0",
+  "description": "Auth boilerplate for frontend JS project",
+  "main": "lib/index",
+  "scripts": {
+    "test": "jest",
+    "dev": "cd example && yarn dev",
+    "lint": "eslint",
+    "setup": "rimraf .husky/pre-commit .husky/pre-push && husky add .husky/pre-commit \"npx lint-staged\" && husky add .husky/pre-push \"yarn tsc --noEmit\"",
+    "build": "tsc",
+    "prepare": "husky install && yarn build",
+    "publish": "yarn build && npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/devima.solutions/auth.git"
+  },
+  "keywords": [
+    "auth",
+    "cookie",
+    "jwt"
+  ],
+  "author": "DevimaSolutions <welcome@devima.solutions> (https://gitlab.com/devima.solutions)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/devima.solutions/auth/issues"
+  },
+  "homepage": "https://gitlab.com/devima.solutions/auth#readme",
+  "dependencies": {},
+  "peerDependencies": {
+    "axios": "*"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "axios": "^0.24.0",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-airbnb-typescript": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^11.2.6",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
+}
