@@ -1,22 +1,34 @@
 import type { IStorage } from '../types';
 
-export default class MemoryStorage implements IStorage {
-  private _data = new Map<string, unknown>();
+export default class LocalStorage implements IStorage {
+  private _normalizeData<T>(data: T) {
+    return JSON.stringify(data);
+  }
+
+  private _denormalizeData<T>(data: string): T {
+    try {
+      return JSON.parse(data);
+    } catch {
+      throw new Error('Value is not an object');
+    }
+  }
 
   remove = (key: string) => {
-    this._data.delete(key);
+    localStorage.removeItem(key);
   };
 
   multiRemove = (keys: string[]) => {
-    keys.forEach((key) => this._data.delete(key));
+    keys.forEach((key) => localStorage.removeItem(key));
   };
 
   setItem<T>(key: string, data: T) {
-    this._data.set(key, data);
+    localStorage.setItem(key, this._normalizeData(data));
   }
 
   getItem<T>(key: string): T {
-    return this._data.get(key) as T;
+    const value = localStorage.getItem(key);
+
+    return this._denormalizeData<T>(value ?? '');
   }
 
   multiSet<T>(data: T) {

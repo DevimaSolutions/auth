@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { AuthEventNames } from '../constants/auth-events';
+import { AuthEventNames } from '../constants';
 import Emitter from '../emitter';
 import RefreshTokenHandler from '../refresh-token-handler';
 import { ensureAuthOptions, isClientErrorStatusCode } from '../utils';
