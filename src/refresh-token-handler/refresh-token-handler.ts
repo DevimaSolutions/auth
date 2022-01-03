@@ -1,3 +1,5 @@
+import { authRetryAxiosRequestConfigFlag } from '../constants';
+
 import type {
   IRefreshTokenHandler,
   IRefreshTokenHandlerParams,
@@ -10,7 +12,7 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
 
   private _axios: AxiosInstance;
 
-  private _interceptorId = 0;
+  private _interceptorId: number | null = null;
 
   protected _bindExternalMethods() {
     this.updateAuthHeader = this.updateAuthHeader.bind(this);
@@ -27,8 +29,9 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
 
   protected _onRejectedInterceptor(params: ISetupInterceptorParams<IUser, ISignInParams>) {
     return async (error: AxiosError) => {
+      const isRetryRequest = error.config.internalData?.[authRetryAxiosRequestConfigFlag];
       const shouldSignOut =
-        !error.response || error.response.status !== 401 || !params.isSignedIn();
+        isRetryRequest || !error.response || error.response.status !== 401 || !params.isSignedIn();
 
       if (shouldSignOut) {
         return Promise.reject(error);
@@ -39,19 +42,27 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
         if (!this._tokenRefreshPromise) {
           this._tokenRefreshPromise = params.forceRefreshToken();
         }
+
         // await existing token refresh if it is in progress
         await this._tokenRefreshPromise;
 
         // Update auth header and retry request
         const authHeader = params.getAuthorizationHeader();
-
         if (!authHeader) {
-          throw new Error('Unauthenticated');
+          return await Promise.reject(error);
         }
 
-        error.config.headers = {
-          ...error.config.headers,
-          authorization: authHeader,
+        error.config = {
+          ...error.config,
+          // Mark this request as a retry to not trigger interceptor on it's response
+
+          internalData: {
+            [authRetryAxiosRequestConfigFlag]: true,
+          },
+          headers: {
+            ...error.config.headers,
+            authorization: authHeader,
+          },
         };
 
         return await this._axios.request(error.config);
@@ -85,7 +96,7 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
   }
 
   dispose() {
-    if (this._interceptorId) {
+    if (this._interceptorId != null) {
       this._axios.interceptors.response.eject(this._interceptorId);
     }
   }

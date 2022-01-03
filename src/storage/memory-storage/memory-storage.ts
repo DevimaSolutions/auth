@@ -16,6 +16,9 @@ export default class MemoryStorage implements IStorage {
   }
 
   getItem<T>(key: string): T {
+    if (!this._data.has(key)) {
+      throw new Error('Value is not defined');
+    }
     return this._data.get(key) as T;
   }
 
