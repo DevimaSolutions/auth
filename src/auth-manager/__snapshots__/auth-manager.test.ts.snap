@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthManager Can get options 1`] = `
+Object {
+  "axiosInstance": [Function],
+  "buildAuthorizationHeader": [Function],
+  "getUser": [MockFunction],
+  "refreshToken": [MockFunction],
+  "signIn": [MockFunction],
+  "signOut": [MockFunction],
+  "storage": MemoryStorage {
+    "_data": Map {},
+    "getItem": [Function],
+    "multiRemove": [Function],
+    "multiSet": [Function],
+    "remove": [Function],
+    "setItem": [Function],
+  },
+  "storageKeys": Object {
+    "accessToken": "@ds/auth/access",
+    "refreshToken": "@ds/auth/refresh",
+    "user": "@ds/auth/user",
+  },
+}
+`;
