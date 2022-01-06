@@ -21,19 +21,19 @@ export default class LocalStorage implements IStorage {
     keys.forEach((key) => localStorage.removeItem(key));
   };
 
-  setItem<T>(key: string, data: T) {
+  setItem = <T>(key: string, data: T) => {
     localStorage.setItem(key, this._normalizeData(data));
-  }
+  };
 
-  getItem<T>(key: string): T {
+  getItem = <T>(key: string): T => {
     const value = localStorage.getItem(key);
 
     return this._denormalizeData<T>(value ?? '');
-  }
+  };
 
-  multiSet<T>(data: T) {
+  multiSet = <T>(data: T) => {
     Object.entries(data).forEach(([key, value]) => {
       this.setItem(key, value);
     });
-  }
+  };
 }

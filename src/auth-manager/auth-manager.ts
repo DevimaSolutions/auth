@@ -44,6 +44,7 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
   }
 
   protected _bindExternalMethods() {
+    // TODO: rewrite to arrow functions
     this._forceRefreshToken = this._forceRefreshToken.bind(this);
     this._createSubscription = this._createSubscription.bind(this);
 
@@ -69,7 +70,7 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
 
   constructor(
     options: IAuthOptions<IUser, ISignInParams>,
-    signedInOptions?: ISignedInOptions<IsSignedIn>,
+    signedInOptions?: ISignedInOptions<IsSignedIn, IUser>,
   ) {
     this._bindExternalMethods();
 
@@ -134,10 +135,15 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     this._refreshTokenHandler.updateAuthHeader(this.getAuthorizationHeader());
   }
 
-  protected _setTokens(accessToken: string | null, refreshToken: string | null) {
+  protected _setTokens(
+    accessToken: string | null,
+    refreshToken: string | null,
+    user: IUser | null,
+  ) {
     this._storage.multiSet({
       [this.options.storageKeys.accessToken]: accessToken,
       [this.options.storageKeys.refreshToken]: refreshToken,
+      [this.options.storageKeys.user]: user,
     });
   }
 
@@ -146,9 +152,13 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
   }
 
   // Update store and axios headers when signedInOptions passed
-  protected _signInOnInit(signedInOptions?: ISignedInOptions<IsSignedIn>) {
+  protected _signInOnInit(signedInOptions?: ISignedInOptions<IsSignedIn, IUser>) {
     if (signedInOptions?.accessToken || signedInOptions?.refreshToken) {
-      this._setTokens(signedInOptions?.accessToken, signedInOptions?.refreshToken);
+      this._setTokens(
+        signedInOptions?.accessToken,
+        signedInOptions?.refreshToken,
+        signedInOptions?.user,
+      );
       this._updateAuthHeader();
     }
   }

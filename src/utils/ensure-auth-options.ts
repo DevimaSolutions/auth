@@ -6,16 +6,20 @@ import { LocalStorage } from '../storage';
 import type { IAuthOptions } from '../';
 import type { IAuthManager } from '../types';
 
+const buildAuthorizationHeader = <IUser, ISignInParams>(
+  manager: IAuthManager<IUser, ISignInParams>,
+) => {
+  const token = manager.getAccessToken();
+  return token ? `Bearer ${token}` : null;
+};
+
 export const ensureAuthOptions = <IUser, ISignInParams>(
   options: IAuthOptions<IUser, ISignInParams>,
 ) => {
   // Some fields are wrapped into a function to create object
   // only if it was not provided in options (see fields `createStorage`, `createAxiosInstance`)
   const defaultOptions = {
-    buildAuthorizationHeader: (manager: IAuthManager<IUser, ISignInParams>) => {
-      const token = manager.getAccessToken();
-      return token ? `Bearer ${token}` : null;
-    },
+    buildAuthorizationHeader,
     createStorage: () => new LocalStorage(),
     storageKeys: defaultAuthStorageKeys,
     createAxiosInstance: () =>

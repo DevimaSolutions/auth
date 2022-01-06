@@ -18,12 +18,12 @@ function initAuth<IUser, SignInParams>(
  */
 function initAuth<IUser, SignInParams, IsSignedIn extends boolean>(
   authOptions: IAuthOptions<IUser, SignInParams>,
-  signedInOptions: ISignedInOptions<IsSignedIn>,
+  signedInOptions: ISignedInOptions<IsSignedIn, IUser>,
 ): IAuthManager<IUser, SignInParams>;
 
 function initAuth<IUser, SignInParams, IsSignedIn extends boolean>(
   authOptions: IAuthOptions<IUser, SignInParams>,
-  signedInOptions?: ISignedInOptions<IsSignedIn>,
+  signedInOptions?: ISignedInOptions<IsSignedIn, IUser>,
 ): Promise<IAuthManager<IUser, SignInParams>> | IAuthManager<IUser, SignInParams> {
   const authManager = new AuthManager(authOptions, signedInOptions);
 

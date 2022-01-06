@@ -22,5 +22,5 @@
     "lib": ["ESNext", "DOM"],
     "outDir": "lib"
   },
-  "exclude": ["**/__tests__", "**/__fixtures__", "**/__mocks__", "example", "lib", "dist", "*.config.ts"]
+  "exclude": ["**/__tests__", "**/__fixtures__", "**/__mocks__", "**/__snapshots__", "example", "lib", "dist", "*.config.ts"]
 }

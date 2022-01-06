@@ -12,6 +12,10 @@
 /example
 /.vscode
 
+# Tests
+*.test.ts
+*.snap
+
 # misc
 .DS_Store
 *.pem

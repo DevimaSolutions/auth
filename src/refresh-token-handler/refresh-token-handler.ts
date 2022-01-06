@@ -15,6 +15,7 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
   private _interceptorId: number | null = null;
 
   protected _bindExternalMethods() {
+    // TODO: rewrite with arrow functions
     this.updateAuthHeader = this.updateAuthHeader.bind(this);
     this.dispose = this.dispose.bind(this);
   }
