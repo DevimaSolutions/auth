@@ -24,6 +24,8 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
 {
   protected _isSignedIn: boolean;
 
+  protected _isDisposed: boolean;
+
   protected readonly _emitter: IEmitter;
 
   protected readonly _refreshTokenHandler: IRefreshTokenHandler;
@@ -75,6 +77,7 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     this._bindExternalMethods();
 
     this._isSignedIn = signedInOptions?.isSignedIn ?? false;
+    this._isDisposed = false;
 
     this._options = ensureAuthOptions(options);
     this._storage = this._options.storage;
@@ -89,6 +92,19 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     });
 
     this._signInOnInit(signedInOptions);
+  }
+
+  /**
+   * @returns true if dispose method was called on this instance.
+   */
+  isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  protected _ensureInstanceNotDisposed() {
+    if (this._isDisposed) {
+      throw new Error('Instance was disposed');
+    }
   }
 
   /**
@@ -177,12 +193,12 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
       [this.options.storageKeys.accessToken]: accessToken,
       [this.options.storageKeys.refreshToken]: refreshToken,
     });
+    this._updateAuthHeader();
 
     const userResult = await this._options.getUser(this);
 
     this._storage.setItem(this.options.storageKeys.user, userResult.data);
 
-    this._updateAuthHeader();
     this._isSignedIn = true;
     this._emitEvents(AuthEventNames.onAuthStateChanged, AuthEventNames.onTokenRefreshed);
   }
@@ -212,11 +228,10 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
    * and the user information in the storage.
    */
   setAuth(user: IUser, authResult: IAuthResult): this {
-    this._storage.multiSet({
-      [this._options.storageKeys.accessToken]: authResult.accessToken,
-      [this._options.storageKeys.refreshToken]: authResult.refreshToken,
-      [this._options.storageKeys.user]: user,
-    });
+    this._ensureInstanceNotDisposed();
+
+    this._setTokens(authResult.accessToken, authResult.refreshToken, user);
+
     this._isSignedIn = true;
 
     this._updateAuthHeader();
@@ -231,10 +246,11 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
    * @param user set of fields for the `IUser` model to be updated.
    * @emits `AuthEventNames.onAuthStateChanged` event
    *
-   * @description Updates the user data in the storage. **Do not** perform API
-   * request to update user on the Backend.
+   * @description Updates the user data in the storage.
    */
   updateUser(user: Partial<IUser>): this {
+    this._ensureInstanceNotDisposed();
+
     const oldUser = this.getUser();
     this._storage.setItem(this._options.storageKeys.user, {
       ...(oldUser || {}),
@@ -262,6 +278,8 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
    * All received data is stored in the storage.
    */
   async signIn(signInParams: ISignInParams): Promise<this> {
+    this._ensureInstanceNotDisposed();
+
     if (this._isSignedIn) {
       return this;
     }
@@ -287,6 +305,8 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
    * and then clear the authentication token and all user information
    */
   async signOut(): Promise<this> {
+    this._ensureInstanceNotDisposed();
+
     if (this._isSignedIn) {
       await this._forceSignOut();
     }
@@ -302,6 +322,8 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
    * @emits `AuthEventNames.onAuthStateChanged` & `AuthEventNames.onTokenRefreshed` events
    */
   async refreshToken(refreshToken?: string): Promise<this> {
+    this._ensureInstanceNotDisposed();
+
     try {
       if (refreshToken) {
         this._storage.setItem(this.options.storageKeys.refreshToken, refreshToken);
@@ -319,10 +341,12 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
   /**
    * @description Removes all active event listeners on this object.
    * Remove response interceptor that refreshes token from axios instance.
+   * Instance should not be used after disposing!
    */
   dispose(): void {
     this._emitter.removeAllListeners();
     this._refreshTokenHandler.dispose();
+    this._isDisposed = true;
   }
 
   protected _createSubscription<
@@ -330,6 +354,8 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     IData = unknown,
     IConfigData = unknown,
   >(eventName: EventName) {
+    this._ensureInstanceNotDisposed();
+
     return (
       callback: AuthResponseCallback<IData, IConfigData> & AuthCallback<IUser, ISignInParams>,
     ): AuthCallbackUnsubscriber => {
