@@ -287,6 +287,9 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
 
     try {
       authResult = await this._options.signIn(signInParams, this);
+
+      this._setTokens(authResult.data.accessToken, authResult.data.refreshToken, this.getUser());
+      this._updateAuthHeader();
     } catch (e) {
       this._emitter.emit(AuthEventNames.onAuthFailed, axios.isAxiosError(e) ? e.response : e);
       throw e;

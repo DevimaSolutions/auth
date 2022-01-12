@@ -25,13 +25,7 @@ function initAuth<IUser, SignInParams, IsSignedIn extends boolean>(
   authOptions: IAuthOptions<IUser, SignInParams>,
   signedInOptions?: ISignedInOptions<IsSignedIn, IUser>,
 ): Promise<IAuthManager<IUser, SignInParams>> | IAuthManager<IUser, SignInParams> {
-  const authManager = new AuthManager(authOptions, signedInOptions);
-
-  if (signedInOptions) {
-    return authManager;
-  }
-
-  return authManager.refreshToken();
+  return new AuthManager(authOptions, signedInOptions);
 }
 
 export default {

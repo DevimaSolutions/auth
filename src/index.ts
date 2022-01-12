@@ -2,7 +2,7 @@ export { default } from './auth';
 export { default as AuthManager } from './auth-manager';
 export { defaultAuthStorageKeys, AuthEventNames } from './constants';
 export { default as Emitter } from './emitter';
-export { LocalStorage } from './storage';
+export { LocalStorage, MemoryStorage } from './storage';
 
 export type { EventListener, EventListenerParams, IEmitter } from './emitter';
 export type { IStorage } from './storage';
