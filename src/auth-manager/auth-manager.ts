@@ -46,7 +46,6 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
   }
 
   protected _bindExternalMethods() {
-    // TODO: rewrite to arrow functions
     this._forceRefreshToken = this._forceRefreshToken.bind(this);
     this._createSubscription = this._createSubscription.bind(this);
 

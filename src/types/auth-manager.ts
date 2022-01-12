@@ -84,8 +84,14 @@ export default interface IAuthManager<IUser, ISignInParams> {
   refreshToken(token: string): Promise<this>;
 
   /**
+   * @returns true if dispose method was called on this instance.
+   */
+  isDisposed(): boolean;
+
+  /**
    * @description Removes all active event listeners on this object.
    * Remove response interceptor that refreshes token from axios instance.
+   * Instance should not be used after disposing!
    */
   dispose(): void;
 
