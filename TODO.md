@@ -1,4 +1,2 @@
-- Increase test coverage
-- Update contribute.md
 - Update readme.md
 - Add CookieStorage class
