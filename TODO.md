@@ -1,2 +1,1 @@
-- Update readme.md
 - Add CookieStorage class

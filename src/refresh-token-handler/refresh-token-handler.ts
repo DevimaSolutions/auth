@@ -83,12 +83,9 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
 
   updateAuthHeader(authorizationHeader: string | null) {
     if (authorizationHeader) {
-      this._axios.defaults.headers = {
-        ...this._axios.defaults.headers,
-        common: {
-          ...this._axios.defaults.headers.common,
-          authorization: authorizationHeader,
-        },
+      this._axios.defaults.headers.common = {
+        ...this._axios.defaults.headers.common,
+        authorization: authorizationHeader,
       };
     } else {
       delete this._axios.defaults.headers.common.authorization;

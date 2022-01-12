@@ -1,110 +1,93 @@
-# o-auth
-
-
+# @devimasolutions/auth
 
 ## Installation
 
 ```sh
-npm install @DevimaSolutions/o-auth
+npm install @devimasolutions/auth
 ```
 
 ## Usage
 
-```js
-import axios from 'axios'
-import OAuth, { IAuthOptions } from '@DevimaSolutions/o-auth'
+Prepare options for initialization
+
+```ts
+// create-auth-options.ts
 
 // Create an options object.
 // You can use the one below as an example.
 
-const axiosInstance = axios.create({
-  baseURL: 'https://my-app.com/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-const oAuthOptions: IAuthOptions = {
-  axiosInstance,
-  signIn: async (email: string, password: string) =>
-    axiosInstance.post('/auth/login', {
-      grand_type: 'password',
-      email,
-      password,
-      scope: 'web_manager',
-    }),
-  signOut: async (): Promise<void> =>
-    axiosInstance.post(
-      '/auth/logout',
-      {},
-    ),
-  refreshToken: async (refresh_token: string) =>
-    axiosInstance.post('/auth/login', {
-      grand_type: 'refresh',
-      refresh_token,
-    }),
-  getUser: async (accessToken: string) =>
-    axiosInstance.get('/user', {
-      headers: {
-        authorization: accessToken,
-      },
-    }),
+export interface IUser {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
 }
 
-// Pass options first time to initialize
-OAuth(oAuthOptions)
+export interface ISignInParams {
+  email: string;
+  password: string;
+}
 
-await OAuth()
-  .signIn('user@example.com', 'secret')
-  .catch((e) => {
-    const { response } = e
-    // ...
-    // Handle API errors here
-  })
-// Then just call the OAuth function to get oAuth object
-// You can also wait for an active action to finish
-OAuth().oncePendingActionComplete(() => {
-  OAuth()
-    .signIn('user@example.com', 'secret-password')
-    .catch((e) => {
-      const { response } = e
-      // ...
-      // Handle API errors here
-    })
-  console.log(OAuth())
-})
+export const authOptions: IAuthOptions<IUser, ISignInParams> = {
+  axiosInstance: axios.create({
+    baseURL: 'https://my-app.com/api',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }),
+  signIn: (signInParams, manager) => manager.axios.post('/auth/sign-in', signInParams),
+  signOut: (manager) => manager.axios.post('/auth/sign-out'),
+  refreshToken: (manager) =>
+    manager.axios.post('/auth/refresh', { refreshToken: manager.getRefreshToken() }),
+  getUser: (manager) => manager.axios.get('/user'),
+};
+```
+
+Create `AuthManager` instance
+
+```ts
+// auth-manager.ts
+
+import auth, { IAuthManager } from '@devimasolutions/auth';
+import createAuthOptions, { ISignInParams, IUser } from './create-auth-options';
+
+// Create a singleton to use in any part of your project
+export let authManager: IAuthManager<IUser, ISignInParams> | null = null;
+
+export const getAuthManager = async () => {
+  if (authManager) {
+    return authManager;
+  }
+  authManager = await auth.initAuth(createAuthOptions());
+  return authManager;
+};
+
+export default {
+  getAuthManager,
+  authManager,
+};
+```
+
+```ts
+// app.ts
+
+import { getAuthManager } from './auth-manager'
+
+const authManager = await getAuthManager();
+
+await authManager
+.signIn({email: 'user@example.com', password: 'secret'})
+.catch((e) => {
+  // ...
+  // Handle API errors here
+});
+
 
 // Here you are already logged in if no error was thrown.
 // So you can make authenticated calls.
-const response = await OAuth().axios.put('user/change-password', {
+const response = await authManager.axios.put('/user/change-password', {
   password: 'secret2'
 })
-```
-
-
-## Socket usage
-
-```javascript
-
-async function createSocketSubscription() {
-  const socket = await OAuth().socketManager.createSocketConnection(
-    'https://socket.greenparc.devima.tech',
-    'notes',
-    '318',
-  )
-
-  socket.on('rooms-updated', (roomChanges) => {
-    //  Handle event
-  })
-
-  socket.on('connection-error', () => {
-    // Handle connection error
-  })
-
-  return () => {
-    OAuth().socketManager.disconnect(socket)
-  }
-}
 ```
 
 ## Live updates with wml
@@ -114,7 +97,7 @@ into the `node_modules` of the dependent project.
 
 ```
 # You need to add a link only once
-wml add ./ ~/dependent-project/node_modules/@DevimaSolutions/o-auth
+wml add ./ ~/dependent-project/node_modules/@devimasolutions/auth
 
 wml start
 ```
@@ -125,4 +108,4 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 
 ## License
 
-MIT
+[MIT License](https://gitlab.com/devima.solutions/auth/auth/-/blob/main/LICENCE.md)
