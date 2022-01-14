@@ -3,6 +3,9 @@
   "version": "0.3.0",
   "description": "Auth boilerplate for frontend JS project",
   "main": "lib/index",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "jest",
     "dev": "cd example && yarn dev",
@@ -12,11 +15,11 @@
     "prepush": "tsc --noEmit && jest",
     "build": "tsc -p tsconfig-build.json",
     "prepare": "yarn build",
-    "publish": "npm publish --access public"
+    "publish": "npm publish --access=public"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/devima.solutions/auth.git"
+    "url": "git+https://gitlab.com/devima.solutions/auth/auth.git"
   },
   "keywords": [
     "auth",
@@ -26,9 +29,9 @@
   "author": "DevimaSolutions <welcome@devima.solutions> (https://gitlab.com/devima.solutions)",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/devima.solutions/auth/issues"
+    "url": "https://gitlab.com/devima.solutions/auth/auth/issues"
   },
-  "homepage": "https://gitlab.com/devima.solutions/auth#readme",
+  "homepage": "https://gitlab.com/devima.solutions/auth/auth/-/blob/main/README.md",
   "dependencies": {},
   "peerDependencies": {
     "axios": "*"
