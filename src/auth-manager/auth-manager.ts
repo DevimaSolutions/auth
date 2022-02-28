@@ -18,6 +18,7 @@ import type {
 import type { IRefreshTokenHandler } from '../refresh-token-handler';
 import type { IAuthResult } from '../types';
 import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { IAuthData } from 'src/types/auth-manager';
 
 export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolean>
   implements IAuthManager<IUser, ISignInParams>
@@ -144,6 +145,18 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     } catch {
       return null;
     }
+  }
+
+  /**
+   * @returns combined data from `getUser`, `getAccessToken`, `getRefreshToken`, `isSignedIn` methods
+   */
+  getAuthData(): IAuthData<IUser> {
+    return {
+      user: this.getUser(),
+      accessToken: this.getAccessToken(),
+      refreshToken: this.getRefreshToken(),
+      isSignedIn: this.isSignedIn(),
+    };
   }
 
   protected _updateAuthHeader() {
