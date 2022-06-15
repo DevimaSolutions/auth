@@ -8,7 +8,7 @@ import type { IAuthManager, IAuthOptions, ISignedInOptions } from './types';
  */
 function initAuth<IUser, SignInParams>(
   authOptions: IAuthOptions<IUser, SignInParams>,
-): Promise<IAuthManager<IUser, SignInParams>>;
+): IAuthManager<IUser, SignInParams>;
 
 /**
  * Hydrates `authManager` instance with predefined state to avoid async initialization
@@ -24,7 +24,7 @@ function initAuth<IUser, SignInParams, IsSignedIn extends boolean>(
 function initAuth<IUser, SignInParams, IsSignedIn extends boolean>(
   authOptions: IAuthOptions<IUser, SignInParams>,
   signedInOptions?: ISignedInOptions<IsSignedIn, IUser>,
-): Promise<IAuthManager<IUser, SignInParams>> | IAuthManager<IUser, SignInParams> {
+): IAuthManager<IUser, SignInParams> {
   return new AuthManager(authOptions, signedInOptions);
 }
 

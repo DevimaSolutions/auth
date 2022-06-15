@@ -27,4 +27,8 @@ export default class MemoryStorage implements IStorage {
       this.setItem(key, value);
     });
   };
+
+  getData = () => {
+    return this._data.entries();
+  };
 }

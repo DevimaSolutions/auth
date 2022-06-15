@@ -54,6 +54,7 @@ export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolea
     this.getUser = this.getUser.bind(this);
     this.getAccessToken = this.getAccessToken.bind(this);
     this.getRefreshToken = this.getRefreshToken.bind(this);
+    this.getAuthData = this.getAuthData.bind(this);
 
     this.setAuth = this.setAuth.bind(this);
     this.updateUser = this.updateUser.bind(this);
