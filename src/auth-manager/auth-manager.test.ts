@@ -33,12 +33,12 @@ const getAxiosMock = () => {
 
 const getOptions = (): IAuthOptions<{ id: number }, { email: string }> => ({
   axiosInstance: getAxiosMock(),
-  signIn: jest.fn(async (data) => getAxiosMock().post('/sign-in', data)),
+  signIn: jest.fn(async (data, manager) => manager.axios.post('/sign-in', data)),
   signOut: jest.fn(async () => {}),
   refreshToken: jest.fn(async (manager) =>
-    getAxiosMock().post('/refresh', { refreshToken: manager.getRefreshToken() }),
+    manager.axios.post('/refresh', { refreshToken: manager.getRefreshToken() }),
   ),
-  getUser: jest.fn(async () => getAxiosMock().get('/user')),
+  getUser: jest.fn(async (manager) => manager.axios.get('/user')),
   storage: new MemoryStorage(),
 });
 

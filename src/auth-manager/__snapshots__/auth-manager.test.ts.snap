@@ -10,6 +10,7 @@ Object {
   "signOut": [MockFunction],
   "storage": MemoryStorage {
     "_data": Map {},
+    "getData": [Function],
     "getItem": [Function],
     "multiRemove": [Function],
     "multiSet": [Function],

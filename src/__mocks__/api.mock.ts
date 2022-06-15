@@ -56,7 +56,7 @@ export const getApiMock = () => {
   });
   mock.onGet('/user').reply((config) => {
     const token = config.headers?.authorization;
-    const { expiresAt, userId } = getTokenData(token);
+    const { expiresAt, userId } = getTokenData(token?.toString());
 
     if (!userId || !expiresAt || expiresAt < new Date()) {
       return [401, 'Unauthorized'];
@@ -66,7 +66,7 @@ export const getApiMock = () => {
   });
   mock.onGet('/food').reply((config) => {
     const token = config.headers?.authorization;
-    const { expiresAt, userId } = getTokenData(token);
+    const { expiresAt, userId } = getTokenData(token?.toString());
 
     if (!userId || !expiresAt || expiresAt < new Date()) {
       return [401, 'Unauthorized'];
@@ -76,7 +76,7 @@ export const getApiMock = () => {
   });
   mock.onGet('/cards').reply((config) => {
     const token = config.headers?.authorization;
-    const { expiresAt, userId } = getTokenData(token);
+    const { expiresAt, userId } = getTokenData(token?.toString());
 
     if (!userId || !expiresAt || expiresAt < new Date()) {
       return [401, 'Unauthorized'];
