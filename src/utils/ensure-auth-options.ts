@@ -19,6 +19,7 @@ export const ensureAuthOptions = <IUser, ISignInParams>(
   // Some fields are wrapped into a function to create object
   // only if it was not provided in options (see fields `createStorage`, `createAxiosInstance`)
   const defaultOptions = {
+    signOut: () => Promise.resolve(),
     buildAuthorizationHeader,
     createStorage: () => new LocalStorage(),
     storageKeys: defaultAuthStorageKeys,
@@ -32,6 +33,7 @@ export const ensureAuthOptions = <IUser, ISignInParams>(
 
   const ensureOptions: Required<IAuthOptions<IUser, ISignInParams>> = {
     ...options,
+    signOut: options.signOut ?? defaultOptions.signOut,
     buildAuthorizationHeader:
       options.buildAuthorizationHeader ?? defaultOptions.buildAuthorizationHeader,
     storage: options.storage ?? defaultOptions.createStorage(),

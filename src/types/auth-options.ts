@@ -13,11 +13,25 @@ export default interface IAuthOptions<
     signInParams: ISignInParams,
     manager: IAuthManager<IUser, ISignInParams>,
   ): Promise<AxiosResponse<IAuthResult>>;
-  signOut(manager: IAuthManager<IUser, ISignInParams>): Promise<void>;
   refreshToken(manager: IAuthManager<IUser, ISignInParams>): Promise<AxiosResponse<IAuthResult>>;
   getUser(manager: IAuthManager<IUser, ISignInParams>): Promise<AxiosResponse<IUser>>;
 
   // Optional parameters
+  signOut?(manager: IAuthManager<IUser, ISignInParams>): Promise<void>;
+  // axios instance passed here will be a base for `manager.axios` you will use further
+  // usually it is enough to set base url here and content type. But if your server require
+  // any additional configuration to perform api request it can be done here
+  // after library initialization response interceptor will be added
+  /**
+   * @description axios instance passed here will be a base for `authManager.axios` you will use further
+   * usually it is enough to set base url and content type here. But if your server requires
+   * any additional configuration to perform api request it can be done here.
+   *
+   * After library initialization response interceptor will be added to this axios instance.
+   * This interceptor will try to refresh the `accessToken` if user is signed in and request returned
+   * 401 (Unauthorized) status code.
+   * @default axios.create({ headers: { 'Content-Type': 'application/json' } })
+   */
   axiosInstance?: AxiosInstance;
   storage?: IStorage;
   buildAuthorizationHeader?(manager: IAuthManager<IUser, ISignInParams>): string | null;
