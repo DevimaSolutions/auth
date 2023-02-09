@@ -34,7 +34,6 @@ tsconfig-build.json
 .gitignore
 .prettierrc
 .prettierignore
-.watchmanconfig
 .circleci
 .gitlab-ci.yml
 .editorconfig
