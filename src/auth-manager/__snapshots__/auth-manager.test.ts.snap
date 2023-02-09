@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AuthManager Can get options 1`] = `
-Object {
+{
   "axiosInstance": [Function],
   "buildAuthorizationHeader": [Function],
   "getUser": [MockFunction],
@@ -17,7 +17,7 @@ Object {
     "remove": [Function],
     "setItem": [Function],
   },
-  "storageKeys": Object {
+  "storageKeys": {
     "accessToken": "@ds/auth/access",
     "refreshToken": "@ds/auth/refresh",
     "user": "@ds/auth/user",
