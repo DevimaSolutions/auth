@@ -17,8 +17,8 @@ import type {
 } from '../';
 import type { IRefreshTokenHandler } from '../refresh-token-handler';
 import type { IAuthResult } from '../types';
+import type { IAuthData } from '../types/auth-manager';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { IAuthData } from 'src/types/auth-manager';
 
 export default class AuthManager<IUser, ISignInParams, IsSignedIn extends boolean>
   implements IAuthManager<IUser, ISignInParams>

@@ -7,7 +7,7 @@ export const getAuthManager = async () => {
   if (authManager) {
     return authManager;
   }
-  authManager = await auth.initAuth(createAuthOptions());
+  authManager = await auth.createAuthManagerInstance(createAuthOptions());
   return authManager;
 };
 
