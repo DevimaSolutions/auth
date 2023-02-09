@@ -14,6 +14,8 @@
 
 # Tests
 *.test.ts
+*.test.js
+*.test.d.ts
 *.snap
 jest.config.ts
 
@@ -34,7 +36,6 @@ tsconfig-build.json
 .gitignore
 .prettierrc
 .prettierignore
-.circleci
 .gitlab-ci.yml
 .editorconfig
 commitlint.config.js

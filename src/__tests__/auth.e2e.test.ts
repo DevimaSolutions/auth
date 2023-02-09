@@ -3,7 +3,7 @@ import auth from '../index';
 
 describe('auth e2e', () => {
   test('Should handle authorized request properly', async () => {
-    const authInstance = await auth.initAuth(authOptions);
+    const authInstance = await auth.createAuthManagerInstance(authOptions);
 
     expect(authInstance.isSignedIn()).toBeFalsy();
 
