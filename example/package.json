@@ -12,12 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "^0.27.2",
     "axios-mock-adapter": "^1.20.0"
   },
   "devDependencies": {
     "concurrently": "^6.3.0",
-    "serve": "^13.0.2",
+    "serve": "^14.2.0",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.4",
     "webpack": "^5.64.0",
