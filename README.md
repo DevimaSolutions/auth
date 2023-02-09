@@ -1,21 +1,76 @@
 # @devimasolutions/auth
 
+**JWT authentication is easy as never before ** ☕
+
+## Features
+- Handle user sign in process
+- Persist user access tokens
+- Send authorized API request with no additional configuration
+- Handle refresh process for expired access tokens
+
 ## Installation
 
 ```sh
 npm install @devimasolutions/auth
+# or using yarn
+yarn add @devimasolutions/auth
 ```
 
-## Usage
+## Usage with React
 
-Prepare options for initialization
+🧑‍🔬 *If you don't use React or just want to have more precise control over the library see [Usage with Typescript](#usage-with-typescript) section.*
+
+## Usage with TypeScript
+
+Prepare options for initialization/ Firstly you need to create
+`authOptions` object that will be used to initialize the library
+
+IAuthOptions interface have the following fields
+
+- `signIn` *(required)* 
+
+This parameter contain a function that is executed when `authManager.signIn` is called. It should send a request to the API to get JWT tokens pair. The API response should have the following format:
+```ts
+{ accessToken: string; refreshToken: string; }
+```
+
+- `signOut` *(optional)* 
+
+```ts
+
+  signOut(manager: IAuthManager<IUser, ISignInParams>): Promise<void>;
+  refreshToken(manager: IAuthManager<IUser, ISignInParams>): Promise<AxiosResponse<IAuthResult>>;
+  getUser(manager: IAuthManager<IUser, ISignInParams>): Promise<AxiosResponse<IUser>>;
+
+  // Optional parameters
+  // axios instance passed here will be a base for `manager.axios` you will use further
+  // usually it is enough to set base url here and content type. But if your server require
+  // any additional configuration to perform api request it can be done here
+  // after library initialization response interceptor will be added
+  /**
+   * @description axios instance passed here will be a base for `authManager.axios` you will use further
+   * usually it is enough to set base url and content type here. But if your server requires
+   * any additional configuration to perform api request it can be done here.
+   *
+   * After library initialization response interceptor will be added to this axios instance.
+   * This interceptor will try to refresh the `accessToken` if user is signed in and request returned
+   * 401 (Unauthorized) status code.
+   * @default axios.create({ headers: { 'Content-Type': 'application/json' } })
+   */
+  axiosInstance?: AxiosInstance;
+  storage?: IStorage;
+  buildAuthorizationHeader?(manager: IAuthManager<IUser, ISignInParams>): string | null;
+  storageKeys?: IStorageKeys;
+}
+```
+
+Example of configuration object:
 
 ```ts
 // create-auth-options.ts
 
-// Create an options object.
-// You can use the one below as an example.
-
+// This interface represents user object that is returned
+// from the getUser function once user is authorized
 export interface IUser {
   id: string;
   email: string;
@@ -23,6 +78,7 @@ export interface IUser {
   role: string;
 }
 
+// This interface represents parameters consumed by sign in endpoint
 export interface ISignInParams {
   email: string;
   password: string;
@@ -36,10 +92,9 @@ export const authOptions: IAuthOptions<IUser, ISignInParams> = {
     },
   }),
   signIn: (signInParams, manager) => manager.axios.post('/auth/sign-in', signInParams),
-  signOut: (manager) => manager.axios.post('/auth/sign-out'),
   refreshToken: (manager) =>
     manager.axios.post('/auth/refresh', { refreshToken: manager.getRefreshToken() }),
-  getUser: (manager) => manager.axios.get('/user'),
+  getUser: (manager) => manager.axios.get('/profile'),
 };
 ```
 
@@ -90,17 +145,19 @@ const response = await authManager.axios.put('/user/change-password', {
 })
 ```
 
-## Live updates with wml
+## Support
+- `axios`
 
-[WML](https://github.com/wix/wml) is used to perform live mapping of library
-into the `node_modules` of the dependent project.
+axios is used to perform API calls. axios versions from `0.17.0` to `0.27.2` are supported.
+using `axios@1.x.x` will lead to the errors when using this library.
 
-```
-# You need to add a link only once
-wml add ./ ~/dependent-project/node_modules/@devimasolutions/auth
+- `react`
+If you are using React components `react@16.8.0` or newer is required. The main reason is usage of Hooks in the library.
 
-wml start
-```
+## Known issues
+
+**Endpoint that return different data for authorized and unauthorized users**. In this case, the library will not know that the access token has expired because the authorized endpoint did not return an unauthorized response error code.
+You may split the endpoints into 2 (one for public access and another one for authorized access) as a workaround.
 
 ## Contributing
 

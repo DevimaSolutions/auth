@@ -4,7 +4,7 @@ import type { IAuthResult } from './signed-in-options';
 import type { IAuthStorageKeys, IDefaultAuthStorageKeys } from './storage';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 
-export default interface IAuthOptions<
+export interface IAuthOptions<
   IUser,
   ISignInParams,
   IStorageKeys extends IAuthStorageKeys = IDefaultAuthStorageKeys,
@@ -37,3 +37,18 @@ export default interface IAuthOptions<
   buildAuthorizationHeader?(manager: IAuthManager<IUser, ISignInParams>): string | null;
   storageKeys?: IStorageKeys;
 }
+
+export interface IAuthFactoryOptions {
+  /**
+   * @description When set to true, forces getAuthManager call to refresh user token in case it create new auth manager.
+   * This may be useful to initialize authManager on SPA startup and make sure user have access to the page.
+   */
+  refreshTokenOnInit?: boolean;
+}
+
+export interface IGlobalAuthOptions<
+  IUser,
+  ISignInParams,
+  IStorageKeys extends IAuthStorageKeys = IDefaultAuthStorageKeys,
+> extends IAuthOptions<IUser, ISignInParams, IStorageKeys>,
+    IAuthFactoryOptions {}
