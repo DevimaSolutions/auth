@@ -10,7 +10,6 @@ exports[`AuthManager Can get options 1`] = `
   "signOut": [MockFunction],
   "storage": MemoryStorage {
     "_data": Map {},
-    "getData": [Function],
     "getItem": [Function],
     "multiRemove": [Function],
     "multiSet": [Function],

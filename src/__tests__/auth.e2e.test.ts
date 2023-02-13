@@ -1,9 +1,9 @@
 import { authOptions } from '../__mocks__';
-import auth from '../index';
+import AuthFactory from '../index';
 
 describe('auth e2e', () => {
   test('Should handle authorized request properly', async () => {
-    const authInstance = await auth.createAuthManagerInstance(authOptions);
+    const authInstance = await AuthFactory.createAuthManagerInstance(authOptions);
 
     expect(authInstance.isSignedIn()).toBeFalsy();
 

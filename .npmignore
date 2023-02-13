@@ -18,6 +18,7 @@
 *.test.d.ts
 *.snap
 jest.config.ts
+__mocks__
 
 # misc
 .DS_Store

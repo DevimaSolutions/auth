@@ -22,7 +22,7 @@ const getAxiosMock = () => {
   mock.onPost('/refresh').reply((config) => {
     const { refreshToken } = JSON.parse(config.data);
 
-    return refreshToken === 'invalid-token'
+    return [null, 'invalid-token'].includes(refreshToken)
       ? [400, { message: 'not valid refresh token' }]
       : [200, { ...updatedAuthData }];
   });
@@ -90,6 +90,24 @@ describe('AuthManager', () => {
     const manager = new AuthManager(getOptions(), signInOptions);
     expect(manager.getUser()).toEqual({ id: 1 });
   });
+  test('Can get auth data when authorized', () => {
+    const manager = new AuthManager(getOptions(), signInOptions);
+    expect(manager.getAuthData()).toEqual({
+      user: { id: 1 },
+      accessToken: 'test-access',
+      refreshToken: 'test-refresh',
+      isSignedIn: true,
+    });
+  });
+  test('Can get auth data when unauthorized', () => {
+    const manager = new AuthManager(getOptions());
+    expect(manager.getAuthData()).toEqual({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isSignedIn: false,
+    });
+  });
   test('Can get empty refresh token when unauthorized', () => {
     const manager = new AuthManager(getOptions());
     expect(manager.getRefreshToken()).toBeNull();
@@ -121,6 +139,18 @@ describe('AuthManager', () => {
     expect(initialUser).toEqual(signInOptions.user);
     expect(manager.getUser()).toEqual(updatedUser);
   });
+  test('Should update user data when unauthorized', () => {
+    const manager = new AuthManager(getOptions());
+    const initialUser = manager.getUser();
+    const updatedUser = {
+      id: 2,
+    };
+
+    manager.updateUser(updatedUser);
+
+    expect(initialUser).toBeNull();
+    expect(manager.getUser()).toEqual(updatedUser);
+  });
   test('Should call sign in request', async () => {
     const options = getOptions();
     const manager = new AuthManager(options);
@@ -139,6 +169,20 @@ describe('AuthManager', () => {
   });
   test('Should emit event when sign in request failed', async () => {
     const options = getOptions();
+    const manager = new AuthManager(options);
+    const signInFailedHandler = jest.fn();
+    const errorHandler = jest.fn();
+    manager.onSignInFailed(signInFailedHandler);
+
+    await manager.signIn({ email: 'error@example.com' }).catch(errorHandler);
+    expect(signInFailedHandler).toBeCalled();
+    expect(errorHandler).toBeCalled();
+  });
+  test('Should emit event when client side error occurred in options.signIn parameter', async () => {
+    const options = getOptions();
+    options.signIn = async () => {
+      throw new Error();
+    };
     const manager = new AuthManager(options);
     const signInFailedHandler = jest.fn();
     const errorHandler = jest.fn();
@@ -175,6 +219,14 @@ describe('AuthManager', () => {
     const options = getOptions();
     const manager = new AuthManager(options, signInOptions);
     await manager.refreshToken('invalid-token');
+
+    expect(manager.isSignedIn()).toBeFalsy();
+  });
+  test('Should sign out when refresh token is not set', async () => {
+    const options = getOptions();
+    const manager = new AuthManager(options);
+
+    await manager.refreshToken();
 
     expect(manager.isSignedIn()).toBeFalsy();
   });

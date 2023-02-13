@@ -1,6 +1,6 @@
 # @devimasolutions/auth
 
-**JWT authentication is easy as never before ** ☕
+**JWT authentication is easy as never before** ☕
 
 ## Features
 - Handle user sign in process
@@ -103,7 +103,7 @@ Create `AuthManager` instance
 ```ts
 // auth-manager.ts
 
-import auth, { IAuthManager } from '@devimasolutions/auth';
+import AuthFactory, { IAuthManager } from '@devimasolutions/auth';
 import createAuthOptions, { ISignInParams, IUser } from './create-auth-options';
 
 // Create a singleton to use in any part of your project
@@ -113,7 +113,7 @@ export const getAuthManager = async () => {
   if (authManager) {
     return authManager;
   }
-  authManager = await auth.initAuth(createAuthOptions());
+  authManager = await AuthFactory.createAuthManagerInstance(createAuthOptions());
   return authManager;
 };
 

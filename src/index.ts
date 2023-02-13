@@ -1,4 +1,4 @@
-export { default } from './auth';
+export { default } from './auth-factory';
 export { default as AuthManager } from './auth-manager';
 export { defaultAuthStorageKeys, AuthEventNames } from './constants';
 export { default as Emitter } from './emitter';

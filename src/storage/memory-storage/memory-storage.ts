@@ -22,13 +22,9 @@ export default class MemoryStorage implements IStorage {
     return this._data.get(key) as T;
   };
 
-  multiSet = <T>(data: T) => {
+  multiSet = <T extends {}>(data: T) => {
     Object.entries(data).forEach(([key, value]) => {
       this.setItem(key, value);
     });
-  };
-
-  getData = () => {
-    return this._data.entries();
   };
 }

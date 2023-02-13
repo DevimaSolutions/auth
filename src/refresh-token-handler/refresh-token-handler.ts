@@ -96,6 +96,7 @@ export default class RefreshTokenHandler<IUser, ISignInParams> implements IRefre
   dispose() {
     if (this._interceptorId != null) {
       this._axios.interceptors.response.eject(this._interceptorId);
+      this._interceptorId = null;
     }
   }
 }

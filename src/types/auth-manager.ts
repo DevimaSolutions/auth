@@ -92,7 +92,7 @@ export default interface IAuthManager<IUser, ISignInParams> {
    *
    * @emits `AuthEventNames.onAuthStateChanged` & `AuthEventNames.onTokenRefreshed` events
    */
-  refreshToken(token: string): Promise<this>;
+  refreshToken(token?: string): Promise<this>;
 
   /**
    * @returns true if dispose method was called on this instance.

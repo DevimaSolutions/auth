@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/devima.solutions/auth/auth.git"
+    "url": "https://github.com/DevimaSolutions/auth.git"
   },
   "keywords": [
     "auth",
@@ -28,12 +28,12 @@
     "typescript",
     "react"
   ],
-  "author": "DevimaSolutions <welcome@devima.solutions> (https://gitlab.com/devima.solutions)",
+  "author": "DevimaSolutions <welcome@devima.solutions> (https://github.com/DevimaSolutions)",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/devima.solutions/auth/auth/issues"
+    "url": "https://github.com/DevimaSolutions/auth/issues"
   },
-  "homepage": "https://gitlab.com/devima.solutions/auth/auth/-/blob/main/README.md",
+  "homepage": "https://github.com/DevimaSolutions/auth#readme",
   "dependencies": {},
   "peerDependencies": {
     "axios": ">= 0.17.0 < 1.0.0",

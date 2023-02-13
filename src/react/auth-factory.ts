@@ -1,4 +1,4 @@
-import AuthFactory from '../auth';
+import AuthFactory from '../auth-factory';
 
 import type { IAuthManager } from '../types';
 
