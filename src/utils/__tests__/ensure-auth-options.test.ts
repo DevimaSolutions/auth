@@ -11,7 +11,6 @@ const options: IAuthOptions<unknown, unknown> = {
         refreshToken: 'test',
       },
     } as AxiosResponse),
-  signOut: async () => {},
   refreshToken: async () =>
     ({
       data: {
@@ -48,14 +47,17 @@ describe('ensureAuthOptions', () => {
     const actualResult = ensureAuthOptions(options);
 
     expect(actualResult.signIn).toBe(options.signIn);
-    expect(actualResult.signOut).toBe(options.signOut);
     expect(actualResult.refreshToken).toBe(options.refreshToken);
     expect(actualResult.getUser).toBe(options.getUser);
   });
 
   test(`default values for optional fields are added`, () => {
     const actualResult = ensureAuthOptions(options);
+    const authManagerMock =
+      jest.createMockFromModule<IAuthManager<unknown, unknown>>('../../auth-manager');
 
+    expect(actualResult.signOut).toBeDefined();
+    expect(actualResult.signOut(authManagerMock)).toEqual(Promise.resolve());
     expect(actualResult.buildAuthorizationHeader).toBeDefined();
     expect(actualResult.storage).toBeDefined();
     expect(actualResult.storageKeys).toBeDefined();

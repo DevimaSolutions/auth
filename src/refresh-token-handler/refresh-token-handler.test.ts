@@ -150,7 +150,10 @@ describe('RefreshTokenHandler', () => {
 
     const refreshTokenHandler = new RefreshTokenHandler(options);
     refreshTokenHandler.dispose();
-    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledTimes(1);
+    // Second call of dispose should be ignored
+    refreshTokenHandler.dispose();
+    expect(spy).toHaveBeenCalledTimes(1);
     await axiosInstance.get('/').catch(() => {});
 
     expect(options.forceRefreshToken).not.toBeCalled();

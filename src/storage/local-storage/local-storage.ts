@@ -31,7 +31,7 @@ export default class LocalStorage implements IStorage {
     return this._denormalizeData<T>(value ?? '');
   };
 
-  multiSet = <T>(data: T) => {
+  multiSet = <T extends {}>(data: T) => {
     Object.entries(data).forEach(([key, value]) => {
       this.setItem(key, value);
     });

@@ -19,7 +19,7 @@ export interface IAuthProviderProps<
   IStorageKeys extends IAuthStorageKeys = IDefaultAuthStorageKeys,
 > extends IAuthFactoryOptions {
   children: ReactNode;
-  defaultValue: IAuthContext<IUser>;
+  defaultValue?: IAuthContext<IUser>;
   config: IAuthOptions<IUser, ISignInParams, IStorageKeys>;
 }
 
@@ -52,8 +52,7 @@ function AuthProvider<
     authFactory.current.getAuthManager().then((authManager) => {
       if (shouldBeDisposed) {
         // This condition will be true only if the unmount function was executed before authManager is initialized
-        // in this case we need to dispose authManager
-        authManager.dispose();
+        // in this case we already disposed authManager
         return;
       }
 

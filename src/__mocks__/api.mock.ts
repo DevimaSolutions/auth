@@ -18,7 +18,7 @@ const getTokenData = (token?: string) => {
   };
 };
 
-const createToken = (userId: number, lifetime = 300) => {
+export const createToken = (userId: number, lifetime = 300) => {
   return userId + '|' + (new Date().getTime() + lifetime).toString(16);
 };
 
@@ -48,10 +48,10 @@ export const getApiMock = () => {
   mock.onPost('/refresh').reply((config) => {
     const { token } = JSON.parse(config.data);
     const { expiresAt, userId } = getTokenData(token);
-
     if (!userId || !expiresAt || expiresAt < new Date()) {
       return [401, 'Unauthorized'];
     }
+
     return [200, { accessToken: createToken(userId), refreshToken: createToken(userId, 1000) }];
   });
   mock.onGet('/user').reply((config) => {

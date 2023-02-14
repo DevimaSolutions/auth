@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/devima.solutions/auth/auth.git"
+    "url": "https://github.com/DevimaSolutions/auth.git"
   },
   "keywords": [
     "auth",
@@ -28,12 +28,12 @@
     "typescript",
     "react"
   ],
-  "author": "DevimaSolutions <welcome@devima.solutions> (https://gitlab.com/devima.solutions)",
+  "author": "DevimaSolutions <welcome@devima.solutions> (https://github.com/DevimaSolutions)",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/devima.solutions/auth/auth/issues"
+    "url": "https://github.com/DevimaSolutions/auth/issues"
   },
-  "homepage": "https://gitlab.com/devima.solutions/auth/auth/-/blob/main/README.md",
+  "homepage": "https://github.com/DevimaSolutions/auth#readme",
   "dependencies": {},
   "peerDependencies": {
     "axios": ">= 0.17.0 < 1.0.0",
@@ -42,8 +42,10 @@
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
     "@commitlint/config-conventional": "^16.0.0",
+    "@testing-library/react": "^13.4.0",
     "@types/jest": "^29.4.0",
     "@types/react": "^18.0.27",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
@@ -63,6 +65,8 @@
     "lint-staged": "^11.2.6",
     "prettier": "^2.4.1",
     "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-test-renderer": "^18.2.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },

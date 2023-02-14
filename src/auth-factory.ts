@@ -39,7 +39,7 @@ export default class AuthFactory<IUser, ISignInParams> {
    * using getAuthManager method
    * @param authOptions options used to initialize AuthManager
    */
-  setGlobalAuthOptions = (authOptions: IGlobalAuthOptions<IUser, ISignInParams>) => {
+  setGlobalAuthOptions = (authOptions: IGlobalAuthOptions<IUser, ISignInParams> | null) => {
     this._options = authOptions;
   };
 
@@ -90,12 +90,9 @@ export default class AuthFactory<IUser, ISignInParams> {
     this._instance = AuthFactory.createAuthManagerInstance(options);
 
     if (refreshTokenOnInit) {
-      const refreshToken = this._instance.getRefreshToken();
       // If there is a refresh token, the user might be authorized.
       // Try to refresh token to get up to date information about the user
-      if (refreshToken) {
-        await this._instance.refreshToken(refreshToken);
-      }
+      await this._instance.refreshToken();
     }
 
     return this._instance;

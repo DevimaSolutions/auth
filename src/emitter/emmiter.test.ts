@@ -7,7 +7,9 @@ describe('Emitter', () => {
     }).not.toThrowError();
   });
   test(`should throw error when max amount of listeners reached`, () => {
-    const listeners = Array(Emitter.DEFAULT_MAX_LISTENERS + 1).fill(() => {});
+    const listeners = Array(Emitter.DEFAULT_MAX_LISTENERS + 1)
+      .fill(0)
+      .map(() => jest.fn());
 
     const emitter = new Emitter();
     expect(() => {
@@ -16,12 +18,12 @@ describe('Emitter', () => {
       });
     }).toThrowError();
 
-    listeners.forEach((listener) => {
-      emitter.off('test', listener);
-    });
+    emitter.removeAllListeners();
   });
   test(`should not throw error when listeners are removed`, () => {
-    const listeners = Array(Emitter.DEFAULT_MAX_LISTENERS + 1).fill(() => {});
+    const listeners = Array(Emitter.DEFAULT_MAX_LISTENERS + 1)
+      .fill(0)
+      .map(() => jest.fn());
 
     const emitter = new Emitter();
     expect(() => {
@@ -84,29 +86,56 @@ describe('Emitter', () => {
     emitter.off('test', listener2);
   });
   test(`should remove all listeners`, () => {
-    const listeners = Array(5).fill(jest.fn());
+    const listeners = Array(5)
+      .fill(0)
+      .map(() => jest.fn());
     const emitter = new Emitter();
 
     listeners.forEach((listener, index) => {
       emitter.on(`test${index}`, listener);
     });
     emitter.removeAllListeners();
+    emitter.emit('test');
 
     listeners.forEach((listener) => {
       expect(listener).not.toBeCalled();
     });
   });
   test(`should remove all listeners for event`, () => {
-    const listeners = Array(5).fill(jest.fn());
+    const listeners = Array(5)
+      .fill(0)
+      .map(() => jest.fn());
     const emitter = new Emitter();
 
     listeners.forEach((listener) => {
       emitter.on('test', listener);
     });
     emitter.removeAllListeners('test');
+    emitter.emit('test');
 
     listeners.forEach((listener) => {
       expect(listener).not.toBeCalled();
+    });
+  });
+  test(`should remove specific event listener`, () => {
+    const listeners = Array(5)
+      .fill(0)
+      .map(() => jest.fn());
+    const emitter = new Emitter();
+    const targetListenerIdx = 0;
+
+    listeners.forEach((listener) => {
+      emitter.on('test', listener);
+    });
+    emitter.removeListener('test', listeners[targetListenerIdx]);
+    emitter.emit('test');
+
+    listeners.forEach((listener, idx) => {
+      if (idx === targetListenerIdx) {
+        expect(listener).not.toBeCalled();
+      } else {
+        expect(listener).toBeCalled();
+      }
     });
   });
   test(`should return event names`, () => {
@@ -120,8 +149,10 @@ describe('Emitter', () => {
 
     expect(actualResult).toEqual(expectedResults);
   });
-  test(`should count proper listener count`, () => {
-    const listeners = Array(5).fill(jest.fn());
+  test(`should count proper listener count: 5`, () => {
+    const listeners = Array(5)
+      .fill(0)
+      .map(() => jest.fn());
     const emitter = new Emitter();
 
     listeners.forEach((listener) => {
@@ -132,8 +163,18 @@ describe('Emitter', () => {
 
     expect(actualResult).toBe(expectedResult);
   });
+  test(`should count proper listener count: 0`, () => {
+    const emitter = new Emitter();
+
+    const expectedResult = 0;
+    const actualResult = emitter.listenerCount('test');
+
+    expect(actualResult).toBe(expectedResult);
+  });
   test(`should return listener list`, () => {
-    const listeners = Array(5).fill(jest.fn());
+    const listeners = Array(5)
+      .fill(0)
+      .map(() => jest.fn());
     const emitter = new Emitter();
 
     listeners.forEach((listener) => {
