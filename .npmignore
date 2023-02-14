@@ -14,7 +14,9 @@
 
 # Tests
 *.test.ts
+*.test.tsx
 *.test.js
+*.test.jsx
 *.test.d.ts
 *.snap
 jest.config.ts

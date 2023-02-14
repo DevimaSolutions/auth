@@ -14,7 +14,7 @@ export interface ISignInParams {
   email: string;
 }
 
-export const authOptions: IAuthOptions<IUser, ISignInParams> = {
+export const getAuthOptions = (): IAuthOptions<IUser, ISignInParams> => ({
   axiosInstance: getApiMock(),
   signIn: (signInParams, manager) => manager.axios.post('/sign-in', signInParams),
   signOut: async () => {},
@@ -22,4 +22,4 @@ export const authOptions: IAuthOptions<IUser, ISignInParams> = {
   getUser: (manager) => manager.axios.get('/user'),
   buildAuthorizationHeader: (manager) => manager.getAccessToken(),
   storage: new MemoryStorage(),
-};
+});
